@@ -1,45 +1,60 @@
-# UCS503P Project Template
+# InvestCircle
 
-This is a project template for UCS503P Project (2026-27
-ODD). 
+InvestCircle is a peer-to-peer stock research and community platform designed to make financial discussions more structured, transparent, and accountable.
 
-There are 3 reports in LaTeX format, namely *a*)
-Project Proposal, *b*) Project Report Prototype Stage,
-and *c*) Project Report Final -- each in their
-respective folders.
+## Overview
 
-Journals are stacked under the folder `journals`, one
-folder for each team member.  A sample entry has been
-made for example.
+Users can create profiles, publish stock research, follow other contributors, maintain watchlists, participate in discussions, and create structured stock calls.
 
-The source code is contained within the folder `code`.
+A stock call contains:
 
-The documentation is under folder `docs`.
+- Stock ticker
+- Bullish or bearish direction
+- Target price
+- Time horizon
 
-All other aspects of code organisation are left to the
-discretion of the user(s).
+Once the specified time horizon expires, the system retrieves market-price data and evaluates whether the call was successful. The result is stored as part of the user's historical track record.
 
+The platform is designed for financial research and discussion only. It does not execute trades or connect to brokerage accounts.
 
-## Docs
+## Key Features
 
-As of now, the `docs` is just an organised collection
-of markdown (`md`) files.  But the build procedure is
-using [`mkdocs`](https://google.com/search?q=mkdocs)
-backend.  As a result, any commit into the `master`
-branch of github repository would result in CI/CD based
-build and deployment of the documentation including the
-journals.
+- User authentication and profiles
+- Stock research posts
+- Structured stock calls
+- Automatic call resolution
+- Contributor performance tracking
+- Follow and unfollow system
+- Comments and threaded replies
+- Stock watchlists
+- Personalized financial News Reel
+- Notifications
+- Search and discovery
+- Optional sector and sentiment tagging
+- Basic moderation
 
-For a local DEV-version of the docs for viewing and
-testing, install the local env and issue the following
-command:
+## Tech Stack
 
-``` shell
-make docs
-```
+- Frontend: React
+- Backend: Node.js
+- Database: PostgreSQL
+- Caching: Redis
+- Authentication: JWT + bcrypt/Argon2
+- External Services: Financial market-data APIs
+- Testing: Unit, integration and frontend testing
+- CI/CD: Git-based continuous integration and deployment
 
-### Local `env` for `docs`
+## Architecture
 
-``` shell
+The system follows a layered architecture:
 
-```
+```text
+React Frontend
+      |
+REST API
+      |
+Business Logic
+      |
+PostgreSQL + Redis
+      |
+External Financial APIs
