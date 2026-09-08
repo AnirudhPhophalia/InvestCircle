@@ -16,7 +16,7 @@ const REACTION_DEFS = [
 
 // A full-screen, Instagram-Stories-style viewer for a news card's voice reactions —
 // swipe up, or use the up/down buttons, to move through the people who reacted.
-export default function VoiceStoryViewer({ reactions, startIndex, headline, onClose }) {
+export default function VoiceStoryViewer({ reactions, startIndex, onClose }) {
   const [index, setIndex] = useState(startIndex)
   const [dragY, setDragY] = useState(0)
   const [dragging, setDragging] = useState(false)
@@ -176,8 +176,6 @@ export default function VoiceStoryViewer({ reactions, startIndex, headline, onCl
           </button>
           <span className="text-on-surface-variant text-[10px] uppercase tracking-wide">{isLast ? 'Close' : 'Swipe up'}</span>
         </div>
-
-        <p className="absolute bottom-[104px] left-md right-16 text-on-surface-variant text-body-sm z-20 line-clamp-2">on &ldquo;{headline}&rdquo;</p>
 
         <div className="absolute right-md bottom-md flex flex-col gap-md z-20 items-center">
           {REACTION_DEFS.map((def) => {

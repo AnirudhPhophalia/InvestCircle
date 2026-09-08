@@ -5,30 +5,41 @@ import { timeAgo } from '../lib/time.js'
 import { findKnownTicker } from '../lib/fundamentals.js'
 import { useActiveTicker } from '../context/TickerContext.jsx'
 import CompanyFundamentals from '../components/CompanyFundamentals.jsx'
-
-// Static, per PHASES.md Phase 3: "static avatar + name + follower count list is enough".
-const REACTIONS = [
-  { name: 'Sarah Jenkins', followers: '45.2K followers', verified: true },
-  { name: 'Marcus Vance', followers: '12.4K followers', verified: true },
-  { name: 'Elena Rostova', followers: '8.9K followers', verified: false },
-]
+import CameraRecorder from '../components/CameraRecorder.jsx'
+import VoiceStoryViewer from '../components/VoiceStoryViewer.jsx'
+import VoiceReactorList from '../components/VoiceReactorList.jsx'
+import { demoReactionsFor } from '../lib/voiceReactions.js'
 
 export default function NewsDetail() {
   const { id } = useParams()
   const { setActiveTicker } = useActiveTicker()
   const [item, setItem] = useState(null)
   const [error, setError] = useState('')
+  const [reactions, setReactions] = useState([])
+  const [recording, setRecording] = useState(false)
+  const [storyIndex, setStoryIndex] = useState(null)
 
   useEffect(() => {
     api
       .get(`/news/${id}`)
-      .then(setItem)
+      .then((data) => {
+        setItem(data)
+        setReactions(demoReactionsFor(data.id, data.id))
+      })
       .catch((e) => setError(e.message))
   }, [id])
 
   useEffect(() => {
     if (item) setActiveTicker(findKnownTicker(item.tags))
   }, [item, setActiveTicker])
+
+  function handleRecordedClip(url, { stance, comment } = {}) {
+    setReactions((prev) => [
+      { id: Date.now(), url, initials: 'YOU', name: 'You', stance: stance || null, comment: comment || '' },
+      ...prev,
+    ])
+    setRecording(false)
+  }
 
   if (error) return <p className="text-body-md text-error">{error}</p>
   if (!item) return <p className="text-body-md text-on-surface-variant">Loading…</p>
@@ -67,30 +78,30 @@ export default function NewsDetail() {
             ))}
         </div>
       </article>
-      <section className="border-t border-outline-variant pt-lg">
-        <h2 className="text-headline-md text-on-surface mb-md">What people are saying</h2>
-        <div className="flex flex-col border border-outline-variant rounded-lg bg-surface-container-lowest overflow-hidden">
-          {REACTIONS.map((r, i) => (
-            <div key={r.name}>
-              <div className="flex items-center gap-md p-md hover:bg-surface-container-low transition-colors">
-                <div className="w-10 h-10 rounded bg-primary-container text-on-primary-container flex items-center justify-center text-label-caps shrink-0">
-                  {r.name.split(' ').map((s) => s[0]).join('')}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-xs">
-                    <span className="text-body-md font-medium text-on-surface truncate">{r.name}</span>
-                    {r.verified && <span className="material-symbols-outlined text-primary text-[14px]">verified</span>}
-                  </div>
-                  <span className="text-body-sm text-on-surface-variant">{r.followers}</span>
-                </div>
-              </div>
-              {i < REACTIONS.length - 1 && <div className="h-px bg-outline-variant mx-md" />}
-            </div>
-          ))}
+      <section className="border-t border-outline-variant pt-lg flex flex-col gap-md">
+        <div className="flex items-center justify-between gap-md">
+          <h2 className="text-headline-md text-on-surface">Voice Reactions</h2>
+          <button
+            onClick={() => setRecording(true)}
+            className="flex items-center gap-xs text-label-caps px-md py-sm bg-primary text-on-primary rounded-full hover:bg-primary-container transition-colors shrink-0"
+          >
+            <span className="material-symbols-outlined text-[18px]">mic</span> Give your voice
+          </button>
         </div>
+        {reactions.length > 0 ? (
+          <VoiceReactorList reactions={reactions} onSelect={setStoryIndex} />
+        ) : (
+          <p className="text-body-sm text-on-surface-variant">No one has reacted with their voice yet — be the first.</p>
+        )}
       </section>
 
       <CompanyFundamentals />
+
+      {recording && <CameraRecorder onClose={() => setRecording(false)} onPost={handleRecordedClip} />}
+
+      {storyIndex !== null && (
+        <VoiceStoryViewer reactions={reactions} startIndex={storyIndex} onClose={() => setStoryIndex(null)} />
+      )}
     </div>
   )
 }

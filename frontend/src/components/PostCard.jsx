@@ -6,10 +6,7 @@ export default function PostCard({ post, onVoteChange }) {
   const tickers = post.tickers ? post.tickers.split(',').filter(Boolean) : []
 
   return (
-    <Link
-      to={`/discussions/${post.id}`}
-      className="bg-surface-container-lowest border border-outline-variant flex transition-colors hover:bg-surface-container-low"
-    >
+    <div className="bg-surface-container-lowest border border-outline-variant flex">
       <VoteButtons post={post} onChange={(result) => onVoteChange(post.id, result)} />
       <div className="p-md flex-1 flex flex-col gap-sm min-w-0">
         <div className="flex items-center gap-xs text-body-sm text-outline flex-wrap">
@@ -23,7 +20,11 @@ export default function PostCard({ post, onVoteChange }) {
           <span>{timeAgo(post.created_at)}</span>
         </div>
         <div className="flex items-start justify-between gap-md">
-          <h2 className="text-headline-md text-on-surface">{post.title}</h2>
+          <h2 className="text-headline-md">
+            <Link to={`/discussions/${post.id}`} className="text-on-surface hover:text-primary transition-colors">
+              {post.title}
+            </Link>
+          </h2>
           {tickers.length > 0 && (
             <div className="flex gap-xs shrink-0">
               {tickers.map((t) => (
@@ -42,6 +43,6 @@ export default function PostCard({ post, onVoteChange }) {
           </span>
         </div>
       </div>
-    </Link>
+    </div>
   )
 }

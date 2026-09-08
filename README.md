@@ -32,30 +32,86 @@ Kept deliberately simple: no ORM, no state-management library, no microservices/
 
 ## Getting started
 
-Requires Node.js 18+.
+### Prerequisites
+
+- **Node.js 18 or later** (check with `node -v`). `better-sqlite3` installs a small native module, so on Linux you may need build tools (`sudo apt install build-essential python3` on Debian/Ubuntu); macOS and Windows generally work out of the box with a recent Node install.
+- No database server, Docker, or API keys to set up — SQLite is a single file created by the seed script, and all market/news/fundamentals data is seeded locally.
+
+### 1. Clone the repo
 
 ```bash
-# 1. Backend — API + SQLite database
-cd backend
-npm install
-node seed.js      # creates investcircle.db and seeds demo data
-npm start          # runs on http://localhost:4000
-
-# 2. Frontend — in a second terminal
-cd frontend
-npm install
-npm run dev         # runs on http://localhost:5173
+git clone https://github.com/AnirudhPhophalia/InvestCircle.git
+cd InvestCircle
 ```
 
-Then open `http://localhost:5173`.
+### 2. Backend — API + database
+
+Runs on **http://localhost:4000**.
+
+```bash
+cd backend
+npm install       # installs express, better-sqlite3, bcrypt, jsonwebtoken, etc.
+node seed.js      # creates backend/investcircle.db and fills it with demo users, posts, and news
+npm start         # starts the API server
+```
+
+You should see `InvestCircle API on http://localhost:4000` in the terminal. Leave this running.
+
+### 3. Frontend — in a second terminal
+
+Runs on **http://localhost:5173**.
+
+```bash
+cd frontend
+npm install       # installs react, react-router-dom, vite, tailwindcss, etc.
+npm run dev
+```
+
+Open `http://localhost:5173` in your browser. The frontend expects the backend to already be running on port 4000 (CORS is pre-configured for `localhost:5173` — see `backend/server.js`).
+
+### Resetting the demo data
+
+There's no migration system — if you change `backend/schema.sql`, or just want a clean slate, delete the SQLite file and reseed:
+
+```bash
+cd backend
+rm -f investcircle.db investcircle.db-wal investcircle.db-shm
+node seed.js
+```
+
+### Scripts reference
+
+| Location | Command | What it does |
+| --- | --- | --- |
+| `backend/` | `npm start` | Runs the API once (`node server.js`) |
+| `backend/` | `npm run dev` | Same, but restarts on file changes (`node --watch`) |
+| `backend/` | `npm run seed` | Wipes and reseeds the database |
+| `frontend/` | `npm run dev` | Starts the Vite dev server |
+| `frontend/` | `npm run build` | Production build, output to `frontend/dist/` |
+| `frontend/` | `npm run preview` | Serves the production build locally |
+| `frontend/` | `npm run lint` | Runs `oxlint` over the frontend source |
+
+### Trying the voice-reaction feature
+
+The News Reel and each article's "Read More" page have a **Give your voice** button that opens your real camera and microphone (`getUserMedia`/`MediaRecorder`) — your browser will prompt for permission the first time. This needs a secure context, which `localhost` satisfies automatically; it will not work if you access the dev server from another device by IP without HTTPS.
+
+### Troubleshooting
+
+- **Port already in use** — something else is already on 4000 or 5173. Stop it, or change the port: for the backend, edit `PORT` in `backend/server.js` (and update `origin` in the same file's `cors()` call, and `frontend/src/lib/api.js`'s base URL, to match); for the frontend, run `npm run dev -- --port 5174`.
+- **`bcrypt`/`better-sqlite3` fails to install** — these ship native addons. Delete `backend/node_modules` and `backend/package-lock.json`, make sure you have a C++ toolchain installed (see Prerequisites), and re-run `npm install`.
+- **Login works but immediately looks logged out** — the session cookie is `httpOnly`/`SameSite=Lax` and scoped to `localhost`; it won't survive if you open the frontend on `127.0.0.1` while the backend is on `localhost` (or vice versa). Use the same hostname for both.
+- **Camera/mic recording doesn't prompt** — check your browser hasn't blocked camera/mic permissions for `localhost` from a previous denial (check the site settings in the address bar).
 
 ### Demo accounts
 
 Seeded by `node seed.js`, all with password `password123`:
 
-- `alice@investcircle.dev`
-- `bob@investcircle.dev`
-- `carol@investcircle.dev`
+| Email | Name | Badge |
+| --- | --- | --- |
+| `lakshay@investcircle.dev` | Lakshay Sachdeva | Verified SEBI Analyst |
+| `anirudh@investcircle.dev` | Anirudh Phophalia | Contributor |
+| `ishan@investcircle.dev` | Ishan Jha | Retail Investor |
+| `aarav@investcircle.dev` | Aarav Kumar Arora | Contributor |
 
 ## Project structure
 

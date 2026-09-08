@@ -17,10 +17,7 @@ export default function VoteButtons({ post, onChange }) {
   }
 
   return (
-    <div
-      className="w-12 bg-surface-container-low flex flex-col items-center py-sm border-r border-outline-variant shrink-0"
-      onClick={(e) => e.stopPropagation()}
-    >
+    <div className="w-12 bg-surface-container-low flex flex-col items-center py-sm border-r border-outline-variant shrink-0">
       <button
         aria-label="Upvote"
         className={`hover:text-primary transition-colors ${post.my_vote === 1 ? 'text-primary' : 'text-outline'}`}

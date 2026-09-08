@@ -3,49 +3,50 @@ import bcrypt from 'bcrypt'
 import db from './db.js'
 
 const users = [
-  { email: 'alice@investcircle.dev', displayName: 'Alice Chen', handle: 'alice_chen', badge: 'Verified Analyst', bio: 'Equity analyst covering IT services and semis.', followers: 12409, following: 45 },
-  { email: 'bob@investcircle.dev', displayName: 'Bob Mehta', handle: 'bob_mehta', badge: 'Contributor', bio: 'Swing trader, mostly large caps.', followers: 892, following: 130 },
-  { email: 'carol@investcircle.dev', displayName: 'Carol Singh', handle: 'carol_singh', badge: '', bio: 'Macro-curious retail investor.', followers: 54, following: 61 },
+  { email: 'lakshay@investcircle.dev', displayName: 'Lakshay Sachdeva', handle: 'lakshay_sachdeva', badge: 'Verified SEBI Analyst', bio: 'SEBI-registered research analyst covering IT services and semiconductors.', followers: 12409, following: 45 },
+  { email: 'anirudh@investcircle.dev', displayName: 'Anirudh Phophalia', handle: 'anirudh_phophalia', badge: 'Contributor', bio: 'Swing trader, mostly large caps.', followers: 892, following: 130 },
+  { email: 'ishan@investcircle.dev', displayName: 'Ishan Jha', handle: 'ishan_jha', badge: 'Retail Investor', bio: 'Macro-curious retail investor.', followers: 54, following: 61 },
+  { email: 'aarav@investcircle.dev', displayName: 'Aarav Kumar Arora', handle: 'aarav_arora', badge: 'Contributor', bio: 'New to the markets, learning in public.', followers: 23, following: 40 },
 ]
 const PASSWORD = 'password123'
 
 const posts = [
-  { by: 'alice_chen', title: 'TCS Q3 Results Analysis: Margins expand despite macro headwinds', body: 'Operating margins expanded 50 bps sequentially despite the broader IT slowdown. Order book remains solid at $8.1B. Maintaining an overweight stance.', tickers: 'TCS' },
-  { by: 'bob_mehta', title: 'Technical breakout observed in NVDA post-consolidation phase. Volume confirming.', body: 'RSI cooled off to 45 and bounced. MACD crossover imminent on the daily chart. Watching the $850 resistance level closely.', tickers: 'NVDA' },
-  { by: 'carol_singh', title: 'Fed rate hold impact on banking sector Net Interest Margins', body: "The 'higher for longer' rhetoric is reshaping expectations for regional and major banks. Deposit betas are catching up faster than modeled.", tickers: 'JPM,BAC' },
-  { by: 'alice_chen', title: 'Is INFY overvalued at these levels?', body: 'Guidance cut last quarter still weighing on sentiment. Valuation looks fair relative to peers but growth visibility is the concern.', tickers: 'INFY' },
+  { by: 'lakshay_sachdeva', title: 'TCS Q3 Results Analysis: Margins expand despite macro headwinds', body: 'Operating margins expanded 50 bps sequentially despite the broader IT slowdown. Order book remains solid at $8.1B. Maintaining an overweight stance.', tickers: 'TCS' },
+  { by: 'anirudh_phophalia', title: 'Technical breakout observed in NVDA post-consolidation phase. Volume confirming.', body: 'RSI cooled off to 45 and bounced. MACD crossover imminent on the daily chart. Watching the $850 resistance level closely.', tickers: 'NVDA' },
+  { by: 'ishan_jha', title: 'Fed rate hold impact on banking sector Net Interest Margins', body: "The 'higher for longer' rhetoric is reshaping expectations for regional and major banks. Deposit betas are catching up faster than modeled.", tickers: 'JPM,BAC' },
+  { by: 'lakshay_sachdeva', title: 'Is INFY overvalued at these levels?', body: 'Guidance cut last quarter still weighing on sentiment. Valuation looks fair relative to peers but growth visibility is the concern.', tickers: 'INFY' },
 ]
 
 const comments = [
-  { onPostIndex: 0, by: 'bob_mehta', body: 'Agree on the margin story, but order book growth is decelerating YoY.' }, // 0
-  { onPostIndex: 0, by: 'carol_singh', body: "What's your price target?" }, // 1
-  { onPostIndex: 0, replyTo: 1, by: 'alice_chen', body: 'Around ₹4,400 over the next two quarters if margins hold up.' }, // 2
-  { onPostIndex: 0, replyTo: 0, by: 'alice_chen', body: "Fair point — I'm watching the order book number closely too, flagged it as the key risk in the post." }, // 3
-  { onPostIndex: 0, by: 'bob_mehta', body: "Worth noting the BFSI vertical alone grew 6% QoQ, that's the real story here." }, // 4
-  { onPostIndex: 1, by: 'alice_chen', body: 'Volume on the breakout day was 2x the 20-day average, decent confirmation.' }, // 5
-  { onPostIndex: 1, replyTo: 5, by: 'carol_singh', body: "Good catch, hadn't checked the volume profile myself." }, // 6
-  { onPostIndex: 2, by: 'alice_chen', body: 'JPM is more insulated given their wholesale banking mix.' }, // 7
-  { onPostIndex: 2, replyTo: 7, by: 'bob_mehta', body: 'BAC still looks cheap on P/B though, feels overdone on the downside.' }, // 8
-  { onPostIndex: 3, by: 'bob_mehta', body: 'Guidance cut was brutal, but valuation is finally reasonable at 22x.' }, // 9
+  { onPostIndex: 0, by: 'anirudh_phophalia', body: 'Agree on the margin story, but order book growth is decelerating YoY.' }, // 0
+  { onPostIndex: 0, by: 'ishan_jha', body: "What's your price target?" }, // 1
+  { onPostIndex: 0, replyTo: 1, by: 'lakshay_sachdeva', body: 'Around ₹4,400 over the next two quarters if margins hold up.' }, // 2
+  { onPostIndex: 0, replyTo: 0, by: 'lakshay_sachdeva', body: "Fair point — I'm watching the order book number closely too, flagged it as the key risk in the post." }, // 3
+  { onPostIndex: 0, by: 'anirudh_phophalia', body: "Worth noting the BFSI vertical alone grew 6% QoQ, that's the real story here." }, // 4
+  { onPostIndex: 1, by: 'lakshay_sachdeva', body: 'Volume on the breakout day was 2x the 20-day average, decent confirmation.' }, // 5
+  { onPostIndex: 1, replyTo: 5, by: 'ishan_jha', body: "Good catch, hadn't checked the volume profile myself." }, // 6
+  { onPostIndex: 2, by: 'lakshay_sachdeva', body: 'JPM is more insulated given their wholesale banking mix.' }, // 7
+  { onPostIndex: 2, replyTo: 7, by: 'anirudh_phophalia', body: 'BAC still looks cheap on P/B though, feels overdone on the downside.' }, // 8
+  { onPostIndex: 3, by: 'anirudh_phophalia', body: 'Guidance cut was brutal, but valuation is finally reasonable at 22x.' }, // 9
 ]
 
 const commentReactions = [
-  { onCommentIndex: 0, by: 'alice_chen', kind: 'insightful' },
-  { onCommentIndex: 2, by: 'bob_mehta', kind: 'insightful' },
-  { onCommentIndex: 2, by: 'carol_singh', kind: 'insightful' },
-  { onCommentIndex: 3, by: 'carol_singh', kind: 'insightful' },
-  { onCommentIndex: 4, by: 'carol_singh', kind: 'flame' },
-  { onCommentIndex: 7, by: 'bob_mehta', kind: 'flame' },
+  { onCommentIndex: 0, by: 'lakshay_sachdeva', kind: 'insightful' },
+  { onCommentIndex: 2, by: 'anirudh_phophalia', kind: 'insightful' },
+  { onCommentIndex: 2, by: 'ishan_jha', kind: 'insightful' },
+  { onCommentIndex: 3, by: 'ishan_jha', kind: 'insightful' },
+  { onCommentIndex: 4, by: 'ishan_jha', kind: 'flame' },
+  { onCommentIndex: 7, by: 'anirudh_phophalia', kind: 'flame' },
 ]
 
 const votes = [
-  { onPostIndex: 0, by: 'bob_mehta', value: 1 },
-  { onPostIndex: 0, by: 'carol_singh', value: 1 },
-  { onPostIndex: 1, by: 'alice_chen', value: 1 },
-  { onPostIndex: 1, by: 'carol_singh', value: 1 },
-  { onPostIndex: 2, by: 'alice_chen', value: 1 },
-  { onPostIndex: 2, by: 'bob_mehta', value: -1 },
-  { onPostIndex: 3, by: 'bob_mehta', value: -1 },
+  { onPostIndex: 0, by: 'anirudh_phophalia', value: 1 },
+  { onPostIndex: 0, by: 'ishan_jha', value: 1 },
+  { onPostIndex: 1, by: 'lakshay_sachdeva', value: 1 },
+  { onPostIndex: 1, by: 'ishan_jha', value: 1 },
+  { onPostIndex: 2, by: 'lakshay_sachdeva', value: 1 },
+  { onPostIndex: 2, by: 'anirudh_phophalia', value: -1 },
+  { onPostIndex: 3, by: 'anirudh_phophalia', value: -1 },
 ]
 
 const news = [
@@ -167,9 +168,9 @@ const insertMany = db.transaction(() => {
   const insertHolding = db.prepare(
     'INSERT INTO watchlist_items (user_id, ticker, buy_price, buy_date, quantity) VALUES (?, ?, ?, ?, ?)'
   )
-  insertHolding.run(userIdByHandle.alice_chen, 'NVDA', 120, '2025-01-15', 10)
-  insertHolding.run(userIdByHandle.alice_chen, 'JPM', 210, '2025-06-01', 15)
-  insertHolding.run(userIdByHandle.alice_chen, 'TCS', 3800, '2024-11-10', 20)
+  insertHolding.run(userIdByHandle.lakshay_sachdeva, 'NVDA', 120, '2025-01-15', 10)
+  insertHolding.run(userIdByHandle.lakshay_sachdeva, 'JPM', 210, '2025-06-01', 15)
+  insertHolding.run(userIdByHandle.lakshay_sachdeva, 'TCS', 3800, '2024-11-10', 20)
 })
 
 insertMany()

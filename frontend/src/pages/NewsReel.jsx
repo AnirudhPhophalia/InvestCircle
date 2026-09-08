@@ -7,46 +7,8 @@ import { useActiveTicker } from '../context/TickerContext.jsx'
 import CameraRecorder from '../components/CameraRecorder.jsx'
 import CompanyFundamentals from '../components/CompanyFundamentals.jsx'
 import VoiceStoryViewer from '../components/VoiceStoryViewer.jsx'
-
-// Demo voice reactions so the feed doesn't look empty before anyone's actually recorded one.
-const DEMO_REACTORS = ['Rahul', 'Sneha', 'Kunal', 'Priya', 'Amit']
-const DEMO_COMMENTS = [
-  { stance: 'bullish', comment: 'Numbers look solid, adding on dips.' },
-  { stance: 'bearish', comment: 'Valuation feels stretched here.' },
-  { stance: 'bullish', comment: 'Management commentary was upbeat.' },
-]
-
-function demoReactionsFor(newsId, seedIndex) {
-  const count = seedIndex % 3 === 0 ? 2 : 1
-  return Array.from({ length: count }, (_, j) => {
-    const name = DEMO_REACTORS[(seedIndex + j) % DEMO_REACTORS.length]
-    return {
-      id: `demo-${newsId}-${j}`,
-      url: 'demo',
-      initials: name[0],
-      name,
-      ...DEMO_COMMENTS[(seedIndex + j) % DEMO_COMMENTS.length],
-    }
-  })
-}
-
-// Deterministic demo "trust tier" per reactor — a registered veteran (gold), a good
-// regular (silver), or a rookie (bronze). No real reputation system yet, so this is
-// just a stable hash for the prototype's visual cue.
-function tierFor(name) {
-  if (name === 'You') return 'gold'
-  let h = 0
-  for (const ch of String(name)) h = (h * 31 + ch.charCodeAt(0)) % 100
-  if (h < 25) return 'gold'
-  if (h < 70) return 'silver'
-  return 'bronze'
-}
-
-const TIER_GLOW = {
-  gold: 'ring-1 ring-[#d4af37] shadow-[0_0_5px_1px_rgba(212,175,55,0.4)]',
-  silver: 'ring-1 ring-[#b9c2cc] shadow-[0_0_5px_1px_rgba(148,163,184,0.35)]',
-  bronze: 'ring-1 ring-[#cd7f32] shadow-[0_0_5px_1px_rgba(205,127,50,0.3)]',
-}
+import VoiceReactorList from '../components/VoiceReactorList.jsx'
+import { demoReactionsFor } from '../lib/voiceReactions.js'
 
 export default function NewsReel() {
   const navigate = useNavigate()
@@ -245,27 +207,8 @@ export default function NewsReel() {
           </div>
 
           {itemReactions.length > 0 && (
-            <div className="flex flex-col items-center gap-sm pt-sm border-t border-outline-variant text-center">
-              <span className="text-body-sm text-on-surface-variant">{itemReactions.length} gave their voice</span>
-              <div className="flex flex-wrap items-center justify-center gap-sm">
-                {itemReactions.map((r, i) => {
-                  const displayName = r.initials === 'YOU' ? 'You' : r.name || r.initials
-                  return (
-                    <button key={r.id} onClick={() => setStoryIndex(0)} className="flex items-center gap-xs">
-                      <span
-                        style={{ animationDelay: `${i * 150}ms` }}
-                        className={`relative w-8 h-8 rounded-full bg-primary-container flex items-center justify-center animate-bob ${TIER_GLOW[tierFor(displayName)]}`}
-                      >
-                        <span className="text-on-primary-container text-[11px] font-bold">{r.initials}</span>
-                        <span className="absolute -bottom-[2px] -right-[2px] w-3.5 h-3.5 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center">
-                          <span className="material-symbols-outlined text-on-surface text-[9px]">play_arrow</span>
-                        </span>
-                      </span>
-                      <span className="text-label-caps text-on-surface-variant">{displayName}</span>
-                    </button>
-                  )
-                })}
-              </div>
+            <div className="pt-sm border-t border-outline-variant">
+              <VoiceReactorList reactions={itemReactions} onSelect={setStoryIndex} />
             </div>
           )}
         </article>
@@ -312,7 +255,7 @@ export default function NewsReel() {
       {recording && <CameraRecorder onClose={() => setRecording(false)} onPost={handleRecordedClip} />}
 
       {storyIndex !== null && (
-        <VoiceStoryViewer reactions={itemReactions} startIndex={storyIndex} headline={item.headline} onClose={() => setStoryIndex(null)} />
+        <VoiceStoryViewer reactions={itemReactions} startIndex={storyIndex} onClose={() => setStoryIndex(null)} />
       )}
     </div>
   )
