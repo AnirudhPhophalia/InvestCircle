@@ -4,15 +4,16 @@ import { api } from '../lib/api.js'
 import { timeAgo } from '../lib/time.js'
 import { findKnownTicker } from '../lib/fundamentals.js'
 import { useActiveTicker } from '../context/TickerContext.jsx'
+import { useVoiceReactions } from '../context/VoiceReactionsContext.jsx'
 import CameraRecorder from '../components/CameraRecorder.jsx'
 import CompanyFundamentals from '../components/CompanyFundamentals.jsx'
 import VoiceStoryViewer from '../components/VoiceStoryViewer.jsx'
 import VoiceReactorList from '../components/VoiceReactorList.jsx'
-import { demoReactionsFor } from '../lib/voiceReactions.js'
 
 export default function NewsReel() {
   const navigate = useNavigate()
   const { setActiveTicker } = useActiveTicker()
+  const { byNewsId: reactions, seedIfNeeded, addReaction } = useVoiceReactions()
   const [params] = useSearchParams()
   const q = params.get('q') || ''
   const [news, setNews] = useState(null)
@@ -22,7 +23,6 @@ export default function NewsReel() {
   const [dragging, setDragging] = useState(false)
   const [startX, setStartX] = useState(0)
   const [recording, setRecording] = useState(false)
-  const [reactions, setReactions] = useState({}) // newsId -> [{ id, url }]
   const [storyIndex, setStoryIndex] = useState(null)
 
   useEffect(() => {
@@ -34,16 +34,10 @@ export default function NewsReel() {
       .get(`/news${query}`)
       .then((items) => {
         setNews(items)
-        setReactions((prev) => {
-          const seeded = { ...prev }
-          items.forEach((item, i) => {
-            if (!seeded[item.id]) seeded[item.id] = demoReactionsFor(item.id, i)
-          })
-          return seeded
-        })
+        items.forEach((item, i) => seedIfNeeded(item.id, i))
       })
       .catch((e) => setError(e.message))
-  }, [q])
+  }, [q, seedIfNeeded])
 
   // Keep the fundamentals panel following whichever card is currently showing.
   useEffect(() => {
@@ -109,13 +103,7 @@ export default function NewsReel() {
   }
 
   function handleRecordedClip(url, { stance, comment } = {}) {
-    setReactions((prev) => ({
-      ...prev,
-      [item.id]: [
-        { id: Date.now(), url, initials: 'YOU', name: 'You', stance: stance || null, comment: comment || '' },
-        ...(prev[item.id] || []),
-      ],
-    }))
+    addReaction(item.id, { id: Date.now(), url, initials: 'YOU', name: 'You', stance: stance || null, comment: comment || '' })
     setRecording(false)
     commitSwipe('like')
   }

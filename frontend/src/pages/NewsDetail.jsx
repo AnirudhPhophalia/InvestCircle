@@ -4,18 +4,18 @@ import { api } from '../lib/api.js'
 import { timeAgo } from '../lib/time.js'
 import { findKnownTicker } from '../lib/fundamentals.js'
 import { useActiveTicker } from '../context/TickerContext.jsx'
+import { useVoiceReactions } from '../context/VoiceReactionsContext.jsx'
 import CompanyFundamentals from '../components/CompanyFundamentals.jsx'
 import CameraRecorder from '../components/CameraRecorder.jsx'
 import VoiceStoryViewer from '../components/VoiceStoryViewer.jsx'
 import VoiceReactorList from '../components/VoiceReactorList.jsx'
-import { demoReactionsFor } from '../lib/voiceReactions.js'
 
 export default function NewsDetail() {
   const { id } = useParams()
   const { setActiveTicker } = useActiveTicker()
+  const { byNewsId, seedIfNeeded, addReaction } = useVoiceReactions()
   const [item, setItem] = useState(null)
   const [error, setError] = useState('')
-  const [reactions, setReactions] = useState([])
   const [recording, setRecording] = useState(false)
   const [storyIndex, setStoryIndex] = useState(null)
 
@@ -24,20 +24,19 @@ export default function NewsDetail() {
       .get(`/news/${id}`)
       .then((data) => {
         setItem(data)
-        setReactions(demoReactionsFor(data.id, data.id))
+        seedIfNeeded(data.id, data.id)
       })
       .catch((e) => setError(e.message))
-  }, [id])
+  }, [id, seedIfNeeded])
 
   useEffect(() => {
     if (item) setActiveTicker(findKnownTicker(item.tags))
   }, [item, setActiveTicker])
 
+  const reactions = item ? byNewsId[item.id] || [] : []
+
   function handleRecordedClip(url, { stance, comment } = {}) {
-    setReactions((prev) => [
-      { id: Date.now(), url, initials: 'YOU', name: 'You', stance: stance || null, comment: comment || '' },
-      ...prev,
-    ])
+    addReaction(item.id, { id: Date.now(), url, initials: 'YOU', name: 'You', stance: stance || null, comment: comment || '' })
     setRecording(false)
   }
 

@@ -137,19 +137,41 @@ function ProfileMenu() {
   )
 }
 
+function BottomNav() {
+  return (
+    <nav className="md:hidden fixed bottom-0 inset-x-0 bg-surface-container-lowest border-t border-outline-variant flex z-40 pb-[env(safe-area-inset-bottom)]">
+      {navItems.map((item) => (
+        <NavLink
+          key={item.to}
+          to={item.to}
+          className={({ isActive }) =>
+            `flex-1 min-w-0 flex flex-col items-center justify-center gap-[2px] py-xs px-[2px] ${isActive ? 'text-primary' : 'text-on-surface-variant'}`
+          }
+        >
+          <span className="material-symbols-outlined text-[22px]">{item.icon}</span>
+          <span className="text-[10px] leading-tight text-center">{item.label}</span>
+        </NavLink>
+      ))}
+    </nav>
+  )
+}
+
 export default function Layout() {
   return (
     <div>
-      <header className="fixed top-0 right-0 left-64 h-16 bg-surface border-b border-outline-variant flex justify-between items-center px-lg z-50">
+      <header className="fixed top-0 right-0 left-0 md:left-64 h-14 md:h-16 bg-surface border-b border-outline-variant flex justify-between items-center gap-sm px-sm md:px-lg z-50">
+        <Link to="/discussions" className="md:hidden shrink-0 w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container text-headline-md">
+          I
+        </Link>
         <SearchBar />
-        <div className="flex items-center gap-md">
+        <div className="flex items-center gap-xs md:gap-md shrink-0">
           <ThemeToggle />
           <NotificationsMenu />
           <ProfileMenu />
         </div>
       </header>
 
-      <nav className="h-screen w-64 fixed left-0 top-0 bg-surface-container-lowest border-r border-outline-variant flex flex-col py-lg px-md z-40">
+      <nav className="hidden md:flex h-screen w-64 fixed left-0 top-0 bg-surface-container-lowest border-r border-outline-variant flex-col py-lg px-md z-40">
         <Link to="/discussions" className="mb-xl px-sm flex items-center gap-sm hover:opacity-80 transition-opacity">
           <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container text-headline-md">
             I
@@ -169,9 +191,11 @@ export default function Layout() {
         </div>
       </nav>
 
-      <main className="ml-64 mt-16 p-lg max-w-container-max mx-auto">
+      <main className="md:ml-64 mt-14 md:mt-16 p-md md:p-lg pb-20 md:pb-lg max-w-container-max mx-auto">
         <Outlet />
       </main>
+
+      <BottomNav />
     </div>
   )
 }
