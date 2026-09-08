@@ -1,0 +1,280 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>InvestCircle - News Reel</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Work+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#d4e3ff",
+                        "error-container": "#93000a",
+                        "on-tertiary-container": "#402200",
+                        "on-primary-fixed-variant": "#004786",
+                        "on-primary": "#00315f",
+                        "inverse-primary": "#005faf",
+                        "on-tertiary-fixed-variant": "#693c00",
+                        "inverse-on-surface": "#313030",
+                        "primary": "#a5c8ff",
+                        "on-primary-container": "#002a53",
+                        "surface-bright": "#393939",
+                        "on-secondary-fixed-variant": "#324867",
+                        "surface-container-low": "#1c1b1b",
+                        "on-surface": "#e5e2e1",
+                        "on-background": "#e5e2e1",
+                        "on-tertiary": "#4a2800",
+                        "on-tertiary-fixed": "#2c1600",
+                        "outline": "#8b919d",
+                        "tertiary-fixed": "#ffdcbe",
+                        "tertiary-fixed-dim": "#ffb870",
+                        "on-secondary": "#1a314f",
+                        "background": "#121212",
+                        "surface": "#121212",
+                        "secondary": "#b1c8ed",
+                        "surface-dim": "#121212",
+                        "on-surface-variant": "#c1c6d3",
+                        "outline-variant": "#2a2a2a",
+                        "surface-container-high": "#2a2a2a",
+                        "primary-container": "#5092e7",
+                        "surface-container-lowest": "#0e0e0e",
+                        "inverse-surface": "#e5e2e1",
+                        "secondary-container": "#344a6a",
+                        "surface-tint": "#a5c8ff",
+                        "on-secondary-fixed": "#011c39",
+                        "surface-container": "#201f1f",
+                        "primary-fixed": "#d4e3ff",
+                        "tertiary": "#ffb870",
+                        "on-error": "#690005",
+                        "surface-container-highest": "#353534",
+                        "primary-fixed-dim": "#a5c8ff",
+                        "on-secondary-container": "#a3badf",
+                        "on-primary-fixed": "#001c3a",
+                        "surface-variant": "#353534",
+                        "on-error-container": "#ffdad6",
+                        "error": "#ffb4ab",
+                        "secondary-fixed-dim": "#b1c8ed",
+                        "tertiary-container": "#ce7e1c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-desktop": "32px",
+                        "md": "16px",
+                        "margin-mobile": "16px",
+                        "base": "4px",
+                        "lg": "24px",
+                        "xs": "4px",
+                        "gutter": "16px",
+                        "sm": "8px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Work Sans"],
+                        "body-md": ["Inter"],
+                        "label-md": ["JetBrains Mono"],
+                        "headline-xl": ["Work Sans"],
+                        "label-sm": ["JetBrains Mono"],
+                        "body-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Work Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-sm": ["10px", { "lineHeight": "14px", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            background-color: theme('colors.background');
+            border-bottom: 1px solid theme('colors.outline-variant');
+            padding: 8px 0;
+            white-space: nowrap;
+        }
+        .ticker-move {
+            display: inline-block;
+            animation: ticker 30s linear infinite;
+        }
+        @keyframes ticker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased min-h-screen flex flex-col md:flex-row">
+<!-- SideNavBar -->
+<nav aria-label="Sidebar Navigation" class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 border-r border-outline-variant bg-surface-container-lowest py-lg px-md">
+<div class="mb-xl px-sm">
+<h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tight">InvestCircle</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-xs uppercase tracking-wider">Market Insights</p>
+</div>
+<div class="flex-1 space-y-sm">
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined text-lg opacity-80 group-hover:opacity-100" data-icon="forum">forum</span>
+<span class="font-label-md text-label-md">Discussions</span>
+</a>
+<!-- Active State for News Reel -->
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-primary border-l-2 border-primary font-bold bg-surface-container-low transition-colors group active:opacity-90 duration-150" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="newspaper" data-weight="fill" style="font-variation-settings: 'FILL' 1;">newspaper</span>
+<span class="font-label-md text-label-md">News Reel</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined text-lg opacity-80 group-hover:opacity-100" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-label-md text-label-md">My Portfolio</span>
+</a>
+</div>
+<div class="mt-auto space-y-sm pt-md border-t border-outline-variant">
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors group" href="#">
+<span class="material-symbols-outlined text-lg opacity-80" data-icon="search">search</span>
+<span class="font-label-md text-label-md">Search</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors group" href="#">
+<span class="material-symbols-outlined text-lg opacity-80" data-icon="notifications">notifications</span>
+<span class="font-label-md text-label-md">Notifications</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors group" href="#">
+<span class="material-symbols-outlined text-lg opacity-80" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col md:ml-64 w-full min-h-screen">
+<!-- TopAppBar -->
+<header class="hidden md:flex justify-between items-center px-lg h-16 fixed top-0 right-0 w-[calc(100%-16rem)] bg-background border-b border-outline-variant z-10">
+<div class="flex items-center">
+<h2 class="font-headline-md text-headline-md font-extrabold text-primary hidden">InvestCircle</h2> <!-- Hidden on desktop, layout consistency -->
+</div>
+<div class="flex items-center gap-md">
+<button aria-label="Notifications" class="p-2 text-on-surface-variant hover:text-primary transition-colors active:scale-95 duration-100 rounded-full">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button aria-label="User Profile" class="p-2 text-on-surface-variant hover:text-primary transition-colors active:scale-95 duration-100 rounded-full">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Main Scrollable Canvas -->
+<main class="flex-1 pt-16 mt-0">
+<!-- Ticker Tape -->
+<div class="ticker-wrap sticky top-16 z-10 hidden md:block">
+<div class="ticker-move font-label-md text-label-md">
+<span class="text-on-surface-variant mr-8">S&amp;P 500 <span class="text-error">5,021.34 (-0.12%)</span></span>
+<span class="text-on-surface-variant mr-8">NASDAQ <span class="text-primary-container">15,942.87 (+0.34%)</span></span>
+<span class="text-on-surface-variant mr-8">DOW <span class="text-error">38,541.11 (-0.21%)</span></span>
+<span class="text-on-surface-variant mr-8">VIX <span class="text-primary-container">14.21 (+1.5%)</span></span>
+<span class="text-on-surface-variant mr-8">US 10YR <span class="text-error">4.21% (-0.03)</span></span>
+</div>
+</div>
+<div class="max-w-[1200px] mx-auto p-margin-mobile md:p-margin-desktop grid grid-cols-1 lg:grid-cols-12 gap-md md:gap-gutter">
+<!-- Feed Column -->
+<div class="lg:col-span-8 flex flex-col gap-md">
+<div class="mb-md">
+<h2 class="font-headline-lg text-headline-lg text-on-background">Live Feed</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Real-time institutional market updates.</p>
+</div>
+<!-- News Card 1 -->
+<article class="bg-background border border-outline-variant rounded-lg p-lg hover:bg-surface-container transition-colors cursor-pointer group relative overflow-hidden">
+<div class="flex justify-between items-start mb-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider bg-surface-container-low px-2 py-1 border border-outline-variant">Macroeconomics</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">10:42 AM EST</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-background mb-2 group-hover:text-primary transition-colors">Federal Reserve Signals Potential Rate Hold in Upcoming Meeting Amidst Mixed Inflation Data</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-md line-clamp-2">Recent economic indicators present a complex picture, leading analysts to revise expectations for near-term interest rate cuts. Core CPI slightly above consensus suggests persistent stickiness.</p>
+<div class="flex items-center justify-between mt-auto pt-sm border-t border-outline-variant">
+<span class="font-label-md text-label-md text-on-surface-variant flex items-center gap-xs"><span class="material-symbols-outlined text-sm">apartment</span> Bloomberg</span>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="bookmark_border">bookmark_border</span>
+</button>
+</div>
+</article>
+<!-- News Card 2 (Image Focus) -->
+<article class="bg-background border border-outline-variant rounded-lg p-lg hover:bg-surface-container transition-colors cursor-pointer group flex flex-col gap-md">
+<div class="flex justify-between items-start mb-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider bg-surface-container-low px-2 py-1 border border-outline-variant">Tech Sector</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">09:15 AM EST</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-background mb-2 group-hover:text-primary transition-colors">Semiconductor Demand Surges as New AI Models Require Massive Compute Power</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-md flex-1">Major foundries are reporting unprecedented order backlogs. Suppliers indicate significant capex increases to meet specialized silicon requirements for the next generation of large language models.</p>
+<div class="w-full aspect-video bg-surface-container-high border border-outline-variant overflow-hidden shrink-0 mb-md">
+<img class="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" data-alt="A macro shot of a semiconductor wafer gleaming with iridescent colors under sterile, bright laboratory lighting. The intricate circuitry patterns are sharply focused, reflecting a highly technical, industrial aesthetic suitable for a high-end corporate financial dashboard." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_OVFjdCscaOI44ArvsHTiOMv_ItlRrjF1mO76VRimezEz067QDPB1l0H5gKTZt3knm4lGWi4uyfMIWVtt38lLimdYohHufm0L9UaJMQ-Hwn0EdhReRv-Se8-190xGxOB3SMVR7b2nHOUuqeyis9YqLZKTQWnnb9IT0zZ3CKnmVzd9_R9nkGOmYBt4WGwvmi2HW52HQ4XrJiAtReODvlasft_Zr54Uk5bVNePqr0R6pxxj9qGOSeoi">
+</div>
+<div class="flex items-center justify-between mt-auto pt-sm border-t border-outline-variant">
+<span class="font-label-md text-label-md text-on-surface-variant flex items-center gap-xs"><span class="material-symbols-outlined text-sm">trending_up</span> WSJ Markets</span>
+</div>
+</article>
+<!-- News Card 3 -->
+<article class="bg-background border border-outline-variant rounded-lg p-lg hover:bg-surface-container transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider bg-surface-container-low px-2 py-1 border border-outline-variant">M&amp;A</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">08:30 AM EST</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-background mb-2 group-hover:text-primary transition-colors">Consolidation in the Energy Sector Continues with $15B Mega-Merger Agreement</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-md">Two leading independent producers have finalized terms, signaling further consolidation aiming for operational efficiencies and scale in a volatile pricing environment.</p>
+<div class="flex items-center justify-between mt-auto pt-sm border-t border-outline-variant">
+<span class="font-label-md text-label-md text-on-surface-variant flex items-center gap-xs"><span class="material-symbols-outlined text-sm">feed</span> Reuters</span>
+</div>
+</article>
+</div>
+<!-- Sidebar / Sentiment Column -->
+<div class="lg:col-span-4 flex flex-col gap-md">
+<!-- Market Sentiment Mini-Dashboard -->
+<div class="bg-background border border-outline-variant rounded-lg p-md">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-md border-b border-outline-variant pb-2">Sector Momentum</h3>
+<div class="space-y-sm">
+<div class="flex justify-between items-center">
+<span class="font-body-sm text-body-sm text-on-background">Technology</span>
+<div class="flex items-center gap-2">
+<div class="w-16 h-1 bg-surface-container-highest rounded-full overflow-hidden"><div class="h-full bg-primary-container w-[80%]"></div></div>
+<span class="font-label-sm text-label-sm text-primary-container">+2.4%</span>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-sm text-body-sm text-on-background">Healthcare</span>
+<div class="flex items-center gap-2">
+<div class="w-16 h-1 bg-surface-container-highest rounded-full overflow-hidden"><div class="h-full bg-primary-container w-[55%]"></div></div>
+<span class="font-label-sm text-label-sm text-primary-container">+0.8%</span>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-sm text-body-sm text-on-background">Energy</span>
+<div class="flex items-center gap-2">
+<div class="w-16 h-1 bg-surface-container-highest rounded-full overflow-hidden"><div class="h-full bg-error w-[40%] float-right"></div></div>
+<span class="font-label-sm text-label-sm text-error">-1.2%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Trending Topics -->
+<div class="bg-background border border-outline-variant rounded-lg p-md">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-md border-b border-outline-variant pb-2">Trending Keywords</h3>
+<div class="flex flex-wrap gap-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container-low px-2 py-1 border border-outline-variant hover:border-primary transition-colors cursor-pointer">#YieldCurve</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container-low px-2 py-1 border border-outline-variant hover:border-primary transition-colors cursor-pointer">#OPEC+</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container-low px-2 py-1 border border-outline-variant hover:border-primary transition-colors cursor-pointer">#NFP</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container-low px-2 py-1 border border-outline-variant hover:border-primary transition-colors cursor-pointer">#AI_Infra</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

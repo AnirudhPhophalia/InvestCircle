@@ -1,0 +1,22 @@
+{
+  "name": "investcircle",
+  "version": "1.0.0",
+  "description": "InvestCircle is a peer-to-peer stock research and community platform designed to make financial discussions more structured, transparent, and accountable.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AnirudhPhophalia/InvestCircle.git"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AnirudhPhophalia/InvestCircle/issues"
+  },
+  "homepage": "https://github.com/AnirudhPhophalia/InvestCircle#readme"
+}

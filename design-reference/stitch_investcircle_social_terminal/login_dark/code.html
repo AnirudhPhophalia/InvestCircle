@@ -1,0 +1,198 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>InvestCircle - Log In</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Work+Sans:wght@600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#a5c8ff",
+                        "tertiary-fixed-dim": "#ffb870",
+                        "tertiary-container": "#ce7e1c",
+                        "on-secondary": "#1a314f",
+                        "secondary-fixed-dim": "#b1c8ed",
+                        "secondary-fixed": "#d4e3ff",
+                        "primary-container": "#5092e7",
+                        "on-primary-fixed": "#001c3a",
+                        "on-secondary-container": "#a3badf",
+                        "inverse-surface": "#e5e2e1",
+                        "on-surface-variant": "#c1c6d3",
+                        "surface-container-high": "#2a2a2a",
+                        "outline": "#8b919d",
+                        "error-container": "#93000a",
+                        "surface-container-low": "#1c1b1b",
+                        "secondary-container": "#344a6a",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed-variant": "#004786",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-container": "#201f1f",
+                        "on-tertiary-container": "#402200",
+                        "secondary": "#b1c8ed",
+                        "on-primary": "#00315f",
+                        "inverse-on-surface": "#313030",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#2c1600",
+                        "surface-container-highest": "#353534",
+                        "surface-dim": "#131313",
+                        "inverse-primary": "#005faf",
+                        "on-primary-container": "#002a53",
+                        "surface-bright": "#393939",
+                        "outline-variant": "#414751",
+                        "tertiary-fixed": "#ffdcbe",
+                        "on-tertiary": "#4a2800",
+                        "surface": "#131313",
+                        "on-background": "#e5e2e1",
+                        "primary": "#a5c8ff",
+                        "on-surface": "#e5e2e1",
+                        "on-error": "#690005",
+                        "tertiary": "#ffb870",
+                        "on-tertiary-fixed-variant": "#693c00",
+                        "surface-variant": "#353534",
+                        "primary-fixed-dim": "#a5c8ff",
+                        "primary-fixed": "#d4e3ff",
+                        "on-secondary-fixed": "#011c39",
+                        "background": "#131313",
+                        "on-secondary-fixed-variant": "#324867"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "sm": "8px",
+                        "xs": "4px",
+                        "md": "16px",
+                        "margin-desktop": "32px",
+                        "margin-mobile": "16px",
+                        "lg": "24px",
+                        "base": "4px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "headline-xl": ["Work Sans"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["JetBrains Mono"],
+                        "headline-md": ["Work Sans"],
+                        "headline-lg": ["Work Sans"],
+                        "label-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-sm": ["10px", { "lineHeight": "14px", "fontWeight": "500" }]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        /* Custom institutional dark mode specifics */
+        body {
+            background-color: #121212; /* Explicit base level 0 */
+            color: #e5e2e1;
+        }
+        .flat-card {
+            background-color: #1a1a1a; /* Explicit surface level 1 */
+            border: 1px solid #333333;
+            box-shadow: none; /* Enforcing flat design */
+        }
+        .flat-input {
+            background-color: #121212;
+            border: 1px solid #333333;
+        }
+        .flat-input:focus {
+            border-color: #387ED1;
+            outline: none;
+            box-shadow: none;
+        }
+        .btn-primary {
+            background-color: #387ED1;
+            color: #ffffff;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #2b64ab;
+        }
+        .btn-secondary {
+            background-color: #1a1a1a;
+            border: 1px solid #333333;
+            color: #e5e2e1;
+        }
+        .btn-secondary:hover {
+            background-color: #252525;
+        }
+        .divider-line {
+            border-top: 1px solid #333333;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-margin-mobile md:p-margin-desktop font-body-md text-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+<main class="w-full max-w-[420px] flex flex-col items-center">
+<!-- Logo Header -->
+<div class="mb-lg flex items-center justify-center gap-sm">
+<span class="material-symbols-outlined text-[32px] text-primary" data-icon="waterfall_chart">waterfall_chart</span>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">InvestCircle</h1>
+</div>
+<!-- Login Card -->
+<div class="flat-card w-full rounded-xl p-lg flex flex-col gap-lg">
+<div class="text-center">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-xs">Log in to your account</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Enter your credentials to access your dashboard.</p>
+</div>
+<form class="flex flex-col gap-md" onsubmit="event.preventDefault();">
+<!-- Email Field -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-label-md text-on-surface-variant" for="email">Email Address</label>
+<input class="flat-input rounded w-full px-md py-[10px] font-body-md text-body-md text-on-surface placeholder:text-outline-variant transition-colors" id="email" name="email" placeholder="name@company.com" required="" type="email">
+</div>
+<!-- Password Field -->
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-center">
+<label class="font-label-md text-label-md text-on-surface-variant" for="password">Password</label>
+<a class="font-label-md text-label-md text-primary hover:text-primary-fixed-dim transition-colors" href="#">Forgot password?</a>
+</div>
+<input class="flat-input rounded w-full px-md py-[10px] font-body-md text-body-md text-on-surface placeholder:text-outline-variant transition-colors" id="password" name="password" placeholder="••••••••" required="" type="password">
+</div>
+<!-- Submit Button -->
+<button class="btn-primary rounded-xl w-full py-sm mt-xs font-label-md text-label-md uppercase tracking-wider h-10 flex items-center justify-center transition-colors" type="submit">
+                    Log In
+                </button>
+</form>
+<!-- Divider -->
+<div class="flex items-center gap-md w-full">
+<div class="divider-line flex-grow h-0"></div>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-widest">or</span>
+<div class="divider-line flex-grow h-0"></div>
+</div>
+<!-- Social Login -->
+<button class="btn-secondary rounded-xl w-full py-sm h-10 flex items-center justify-center gap-sm font-label-md text-label-md transition-colors" type="button">
+<!-- SVG Google Icon (Monochrome for professional look) -->
+<svg class="w-4 h-4 text-on-surface" fill="currentColor" viewBox="0 0 24 24">
+<path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"></path>
+</svg>
+                Continue with Google
+            </button>
+</div>
+<!-- Footer Link -->
+<div class="mt-lg text-center">
+<span class="font-body-sm text-body-sm text-on-surface-variant">New here? </span>
+<a class="font-body-sm text-body-sm text-primary hover:text-primary-fixed-dim font-medium transition-colors" href="#">Sign up</a>
+</div>
+</main>
+</body></html>
