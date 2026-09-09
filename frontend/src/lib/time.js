@@ -1,6 +1,7 @@
-// SQLite's datetime('now') returns UTC without a timezone marker — mark it explicitly.
-export function timeAgo(sqliteDateStr) {
-  const date = new Date(sqliteDateStr.replace(' ', 'T') + 'Z')
+// Postgres timestamps come through the API as proper ISO 8601 strings (via JSON
+// serialization of the driver's Date objects), so no reformatting is needed.
+export function timeAgo(dateStr) {
+  const date = new Date(dateStr)
   const minutes = Math.floor((Date.now() - date.getTime()) / 60000)
   if (minutes < 1) return 'just now'
   if (minutes < 60) return `${minutes}m ago`

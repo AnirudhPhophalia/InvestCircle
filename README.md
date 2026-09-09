@@ -19,8 +19,9 @@ This is a college Software Engineering group project. It is a working prototype/
 | --------- | -------------------------------------------------------------------- |
 | Frontend  | React + Vite, Tailwind CSS, React Router — plain JavaScript, no TypeScript |
 | Backend   | Node.js + Express, plain JavaScript                                  |
-| Database  | SQLite via `better-sqlite3` — a single file, raw SQL, no ORM          |
+| Database  | PostgreSQL via `pg` — raw SQL, no ORM                                 |
 | Auth      | bcrypt password hashing + JWT stored in an HTTP-only cookie          |
+| Hosting   | Vercel — frontend (static build) and backend (serverless functions under `/api`) deployed together from one project |
 
 Kept deliberately simple: no ORM, no state-management library, no microservices/Docker/CI — a two-folder app (`frontend/`, `backend/`) that any of the four teammates can read end to end.
 
@@ -34,8 +35,8 @@ Kept deliberately simple: no ORM, no state-management library, no microservices/
 
 ### Prerequisites
 
-- **Node.js 18 or later** (check with `node -v`). `better-sqlite3` installs a small native module, so on Linux you may need build tools (`sudo apt install build-essential python3` on Debian/Ubuntu); macOS and Windows generally work out of the box with a recent Node install.
-- No database server, Docker, or API keys to set up — SQLite is a single file created by the seed script, and all market/news/fundamentals data is seeded locally.
+- **Node.js 18 or later** (check with `node -v`). `bcrypt` installs a small native module, so on Linux you may need build tools (`sudo apt install build-essential python3` on Debian/Ubuntu); macOS and Windows generally work out of the box with a recent Node install.
+- **A PostgreSQL database.** For local dev, either install Postgres yourself (e.g. `brew install postgresql@16` on macOS) or point `DATABASE_URL` at any hosted instance (the same Vercel Postgres/Neon database used for deployment works fine for local dev too — see "Deploying to Vercel" below). There's no separate migration step: the app runs `backend/schema.sql` automatically on startup (`CREATE TABLE IF NOT EXISTS`), so a brand-new empty database is all you need.
 
 ### 1. Clone the repo
 
@@ -44,20 +45,27 @@ git clone https://github.com/AnirudhPhophalia/InvestCircle.git
 cd InvestCircle
 ```
 
-### 2. Backend — API + database
+### 2. Create a local database (skip if using a hosted one)
+
+```bash
+createdb investcircle
+```
+
+### 3. Backend — API + database
 
 Runs on **http://localhost:4000**.
 
 ```bash
 cd backend
-npm install       # installs express, better-sqlite3, bcrypt, jsonwebtoken, etc.
-node seed.js      # creates backend/investcircle.db and fills it with demo users, posts, and news
+npm install       # installs express, pg, bcrypt, jsonwebtoken, etc.
+export DATABASE_URL="postgresql://localhost:5432/investcircle"   # or your hosted connection string
+node seed.js      # creates the tables and fills them with demo users, posts, and news
 npm start         # starts the API server
 ```
 
-You should see `InvestCircle API on http://localhost:4000` in the terminal. Leave this running.
+You should see `InvestCircle API on http://localhost:4000` in the terminal. Leave this running. `DATABASE_URL` needs to be set in every terminal that runs the backend (export it, or prefix each command: `DATABASE_URL=... node seed.js`).
 
-### 3. Frontend — in a second terminal
+### 4. Frontend — in a second terminal
 
 Runs on **http://localhost:5173**.
 
@@ -67,16 +75,16 @@ npm install       # installs react, react-router-dom, vite, tailwindcss, etc.
 npm run dev
 ```
 
-Open `http://localhost:5173` in your browser. The frontend expects the backend to already be running on port 4000 (CORS is pre-configured for `localhost:5173` — see `backend/server.js`).
+Open `http://localhost:5173` in your browser. The frontend expects the backend to already be running on port 4000 (CORS is pre-configured for `localhost:5173` — see `backend/app.js`).
 
 ### Resetting the demo data
 
-There's no migration system — if you change `backend/schema.sql`, or just want a clean slate, delete the SQLite file and reseed:
+There's no migration system beyond `CREATE TABLE IF NOT EXISTS` — if you change `backend/schema.sql` in a way that needs a clean slate, drop and recreate the database, then reseed:
 
 ```bash
+dropdb investcircle && createdb investcircle
 cd backend
-rm -f investcircle.db investcircle.db-wal investcircle.db-shm
-node seed.js
+DATABASE_URL="postgresql://localhost:5432/investcircle" node seed.js
 ```
 
 ### Scripts reference
@@ -85,7 +93,7 @@ node seed.js
 | --- | --- | --- |
 | `backend/` | `npm start` | Runs the API once (`node server.js`) |
 | `backend/` | `npm run dev` | Same, but restarts on file changes (`node --watch`) |
-| `backend/` | `npm run seed` | Wipes and reseeds the database |
+| `backend/` | `npm run seed` | Wipes and reseeds the database (needs `DATABASE_URL`) |
 | `frontend/` | `npm run dev` | Starts the Vite dev server |
 | `frontend/` | `npm run build` | Production build, output to `frontend/dist/` |
 | `frontend/` | `npm run preview` | Serves the production build locally |
@@ -93,14 +101,54 @@ node seed.js
 
 ### Trying the voice-reaction feature
 
-The News Reel and each article's "Read More" page have a **Give your voice** button that opens your real camera and microphone (`getUserMedia`/`MediaRecorder`) — your browser will prompt for permission the first time. This needs a secure context, which `localhost` satisfies automatically; it will not work if you access the dev server from another device by IP without HTTPS.
+The News Reel and each article's "Read More" page have a **Give your voice** button that opens your real camera and microphone (`getUserMedia`/`MediaRecorder`) — your browser will prompt for permission the first time. This needs a secure context, which `localhost` (and any `https://` deployment, like Vercel) satisfies automatically.
 
 ### Troubleshooting
 
-- **Port already in use** — something else is already on 4000 or 5173. Stop it, or change the port: for the backend, edit `PORT` in `backend/server.js` (and update `origin` in the same file's `cors()` call, and `frontend/src/lib/api.js`'s base URL, to match); for the frontend, run `npm run dev -- --port 5174`.
-- **`bcrypt`/`better-sqlite3` fails to install** — these ship native addons. Delete `backend/node_modules` and `backend/package-lock.json`, make sure you have a C++ toolchain installed (see Prerequisites), and re-run `npm install`.
+- **Port already in use** — something else is already on 4000 or 5173. Stop it, or change the port: for the backend, set `PORT=4001` (and update `frontend/src/lib/api.js`'s dev `BASE` to match); for the frontend, run `npm run dev -- --port 5174`.
+- **`DATABASE_URL is not set` error on startup** — export it in the same terminal before running `node seed.js` / `npm start` (step 3 above).
+- **`bcrypt` fails to install** — it ships a native addon. Delete `backend/node_modules` and `backend/package-lock.json`, make sure you have a C++ toolchain installed (see Prerequisites), and re-run `npm install`.
 - **Login works but immediately looks logged out** — the session cookie is `httpOnly`/`SameSite=Lax` and scoped to `localhost`; it won't survive if you open the frontend on `127.0.0.1` while the backend is on `localhost` (or vice versa). Use the same hostname for both.
-- **Camera/mic recording doesn't prompt** — check your browser hasn't blocked camera/mic permissions for `localhost` from a previous denial (check the site settings in the address bar).
+- **Camera/mic recording doesn't prompt** — check your browser hasn't blocked camera/mic permissions for the site from a previous denial (check the site settings in the address bar).
+
+## Deploying to Vercel
+
+The whole app — frontend and backend — deploys as **one Vercel project**: the React app builds to static files, and the Express API runs as a serverless function under `/api`. Same domain for both means no CORS or cross-site cookie issues to fight with, which is the most reliable setup for a live demo.
+
+`vercel.json` at the repo root already configures the build (`frontend/` builds, `api/index.js` serves the API); you don't need to change anything there. What's left is provisioning a database and setting one environment variable.
+
+### 1. Import the repo into Vercel
+
+If not already done: on [vercel.com](https://vercel.com), **Add New → Project**, import `AnirudhPhophalia/InvestCircle`, and leave **Root Directory** as the repo root (not `frontend/` — `vercel.json` handles both halves from there). Vercel picks up `installCommand`/`buildCommand`/`outputDirectory` from `vercel.json` automatically.
+
+### 2. Create a Postgres database
+
+In the Vercel dashboard: your project → **Storage** tab → **Create Database** → **Postgres** (this is Neon-backed). Connect it to the project — Vercel automatically adds a `DATABASE_URL` environment variable for you, no copy-pasting a connection string required.
+
+(Using Supabase or another provider instead is fine too — just add `DATABASE_URL` yourself under **Settings → Environment Variables** with that provider's connection string.)
+
+### 3. Set the JWT secret
+
+Still under **Settings → Environment Variables**, add:
+
+- `JWT_SECRET` — any long random string (e.g. generate one with `openssl rand -hex 32`). Without this, sessions fall back to a shared dev-only secret, which is fine for a demo but not something to leave in place long-term.
+
+### 4. Deploy
+
+Push to `main` (or click **Redeploy** in the dashboard) — Vercel builds and deploys automatically. The tables are created on first request (`backend/db.js` runs `schema.sql` on startup), but they'll be **empty** until you seed them.
+
+### 5. Seed the production database
+
+Run the seed script from your machine, pointed at the production database, once:
+
+```bash
+cd backend
+DATABASE_URL="<the same connection string Vercel is using>" node seed.js
+```
+
+Find that connection string under Vercel → your project → **Storage** → your database → **.env.local** tab (copy the `DATABASE_URL` value), or run `vercel env pull` in the project if you have the Vercel CLI installed. Re-run this any time you want to reset the demo data back to its original state — it wipes and reseeds every table.
+
+Once seeded, the deployed URL is a fully working demo — same demo accounts as local dev (see below).
 
 ### Demo accounts
 
@@ -118,7 +166,9 @@ Seeded by `node seed.js`, all with password `password123`:
 ```
 InvestCircle/
   frontend/            React + Vite app
-  backend/             Express API + SQLite (schema.sql, seed.js, routes/)
+  backend/             Express API + PostgreSQL (schema.sql, seed.js, routes/, app.js)
+  api/index.js         Vercel serverless entry point (imports backend/app.js)
+  vercel.json          Vercel build/routing config for the combined deployment
   design-reference/    Original Stitch UI export — reference only
   docs/                Build notes and phase plan for this project
   journals/            Per-teammate weekly dev journals
@@ -127,7 +177,7 @@ InvestCircle/
 ## Known limitations (by design, for a prototype)
 
 - No real market-data feed — prices and fundamentals are seeded demo data (clearly labeled in the UI).
-- The JWT signing secret is a hardcoded dev value — fine for a local demo, not meant for a real deployment.
+- The JWT signing secret falls back to a shared dev-only value if `JWT_SECRET` isn't set — fine for local dev, set it explicitly in production (see Deploying to Vercel).
 - No password reset, email verification, or rate limiting.
 
 ## Team

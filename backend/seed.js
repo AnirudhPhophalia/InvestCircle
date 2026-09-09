@@ -127,52 +127,99 @@ Several brokerages cut their price targets following the results, though most ma
   },
 ]
 
-const insertMany = db.transaction(() => {
-  db.prepare('DELETE FROM votes').run()
-  db.prepare('DELETE FROM comment_reactions').run()
-  db.prepare('DELETE FROM comments').run()
-  db.prepare('DELETE FROM posts').run()
-  db.prepare('DELETE FROM watchlist_items').run()
-  db.prepare('DELETE FROM news_items').run()
-  db.prepare('DELETE FROM users').run()
+const client = await db.connect()
+try {
+  await client.query('BEGIN')
 
-  const insertUser = db.prepare(
-    'INSERT INTO users (email, password_hash, display_name, handle, bio, badge, follower_count, following_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-  )
+  await client.query('DELETE FROM votes')
+  await client.query('DELETE FROM comment_reactions')
+  await client.query('DELETE FROM comments')
+  await client.query('DELETE FROM posts')
+  await client.query('DELETE FROM watchlist_items')
+  await client.query('DELETE FROM news_items')
+  await client.query('DELETE FROM users')
+
   const userIdByHandle = {}
   for (const u of users) {
-    const hash = bcrypt.hashSync(PASSWORD, 10)
-    const { lastInsertRowid } = insertUser.run(u.email, hash, u.displayName, u.handle, u.bio, u.badge, u.followers, u.following)
-    userIdByHandle[u.handle] = lastInsertRowid
+    const hash = await bcrypt.hash(PASSWORD, 10)
+    const { rows } = await client.query(
+      'INSERT INTO users (email, password_hash, display_name, handle, bio, badge, follower_count, following_count) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
+      [u.email, hash, u.displayName, u.handle, u.bio, u.badge, u.followers, u.following]
+    )
+    userIdByHandle[u.handle] = rows[0].id
   }
 
-  const insertPost = db.prepare('INSERT INTO posts (user_id, title, body, tickers) VALUES (?, ?, ?, ?)')
-  const postIds = posts.map((p) => insertPost.run(userIdByHandle[p.by], p.title, p.body, p.tickers).lastInsertRowid)
+  const postIds = []
+  for (const p of posts) {
+    const { rows } = await client.query('INSERT INTO posts (user_id, title, body, tickers) VALUES ($1, $2, $3, $4) RETURNING id', [
+      userIdByHandle[p.by],
+      p.title,
+      p.body,
+      p.tickers,
+    ])
+    postIds.push(rows[0].id)
+  }
 
-  const insertComment = db.prepare('INSERT INTO comments (post_id, user_id, parent_id, body) VALUES (?, ?, ?, ?)')
   const commentIds = []
-  comments.forEach((c, i) => {
+  for (let i = 0; i < comments.length; i++) {
+    const c = comments[i]
     const parentId = c.replyTo != null ? commentIds[c.replyTo] : null
-    commentIds[i] = insertComment.run(postIds[c.onPostIndex], userIdByHandle[c.by], parentId, c.body).lastInsertRowid
-  })
+    const { rows } = await client.query(
+      'INSERT INTO comments (post_id, user_id, parent_id, body) VALUES ($1, $2, $3, $4) RETURNING id',
+      [postIds[c.onPostIndex], userIdByHandle[c.by], parentId, c.body]
+    )
+    commentIds[i] = rows[0].id
+  }
 
-  const insertCommentReaction = db.prepare('INSERT INTO comment_reactions (comment_id, user_id, kind) VALUES (?, ?, ?)')
-  for (const r of commentReactions) insertCommentReaction.run(commentIds[r.onCommentIndex], userIdByHandle[r.by], r.kind)
+  for (const r of commentReactions) {
+    await client.query('INSERT INTO comment_reactions (comment_id, user_id, kind) VALUES ($1, $2, $3)', [
+      commentIds[r.onCommentIndex],
+      userIdByHandle[r.by],
+      r.kind,
+    ])
+  }
 
-  const insertVote = db.prepare('INSERT INTO votes (post_id, user_id, value) VALUES (?, ?, ?)')
-  for (const v of votes) insertVote.run(postIds[v.onPostIndex], userIdByHandle[v.by], v.value)
+  for (const v of votes) {
+    await client.query('INSERT INTO votes (post_id, user_id, value) VALUES ($1, $2, $3)', [
+      postIds[v.onPostIndex],
+      userIdByHandle[v.by],
+      v.value,
+    ])
+  }
 
-  const insertNews = db.prepare('INSERT INTO news_items (source, headline, body, full_article, tags) VALUES (?, ?, ?, ?, ?)')
-  for (const n of news) insertNews.run(n.source, n.headline, n.body, n.fullArticle, n.tags)
+  for (const n of news) {
+    await client.query('INSERT INTO news_items (source, headline, body, full_article, tags) VALUES ($1, $2, $3, $4, $5)', [
+      n.source,
+      n.headline,
+      n.body,
+      n.fullArticle,
+      n.tags,
+    ])
+  }
 
-  const insertHolding = db.prepare(
-    'INSERT INTO watchlist_items (user_id, ticker, buy_price, buy_date, quantity) VALUES (?, ?, ?, ?, ?)'
-  )
-  insertHolding.run(userIdByHandle.lakshay_sachdeva, 'NVDA', 120, '2025-01-15', 10)
-  insertHolding.run(userIdByHandle.lakshay_sachdeva, 'JPM', 210, '2025-06-01', 15)
-  insertHolding.run(userIdByHandle.lakshay_sachdeva, 'TCS', 3800, '2024-11-10', 20)
-})
+  const holdings = [
+    ['NVDA', 120, '2025-01-15', 10],
+    ['JPM', 210, '2025-06-01', 15],
+    ['TCS', 3800, '2024-11-10', 20],
+  ]
+  for (const [ticker, buyPrice, buyDate, quantity] of holdings) {
+    await client.query('INSERT INTO watchlist_items (user_id, ticker, buy_price, buy_date, quantity) VALUES ($1, $2, $3, $4, $5)', [
+      userIdByHandle.lakshay_sachdeva,
+      ticker,
+      buyPrice,
+      buyDate,
+      quantity,
+    ])
+  }
 
-insertMany()
+  await client.query('COMMIT')
+} catch (err) {
+  await client.query('ROLLBACK')
+  throw err
+} finally {
+  client.release()
+}
+
 console.log(`Seeded ${users.length} users, ${posts.length} posts, ${news.length} news items.`)
 console.log(`Log in as any of: ${users.map((u) => u.email).join(', ')} — password: ${PASSWORD}`)
+await db.end()

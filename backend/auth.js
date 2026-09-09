@@ -1,7 +1,8 @@
 import jwt from 'jsonwebtoken'
 
-// Dev-only secret — fine for a student prototype, not for production.
-const JWT_SECRET = 'investcircle-dev-secret'
+// Falls back to a dev-only secret so local setup needs no extra config;
+// set a real JWT_SECRET env var for the deployed instance.
+const JWT_SECRET = process.env.JWT_SECRET || 'investcircle-dev-secret'
 const COOKIE_NAME = 'ic_session'
 
 export function signToken(userId) {
@@ -12,6 +13,7 @@ export function setSessionCookie(res, userId) {
   res.cookie(COOKIE_NAME, signToken(userId), {
     httpOnly: true,
     sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
     maxAge: 7 * 24 * 60 * 60 * 1000,
   })
 }

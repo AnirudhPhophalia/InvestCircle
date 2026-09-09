@@ -12,7 +12,7 @@ function makeHandle(displayName) {
   return `${base || 'user'}_${suffix}`
 }
 
-router.post('/signup', (req, res) => {
+router.post('/signup', async (req, res) => {
   const { email, password, displayName } = req.body
   if (!email || !password || !displayName) {
     return res.status(400).json({ error: 'Email, password, and display name are required' })
@@ -20,24 +20,27 @@ router.post('/signup', (req, res) => {
   if (password.length < 6) {
     return res.status(400).json({ error: 'Password must be at least 6 characters' })
   }
-  const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email)
-  if (existing) return res.status(409).json({ error: 'An account with that email already exists' })
+  const existing = await db.query('SELECT id FROM users WHERE email = $1', [email])
+  if (existing.rows.length) return res.status(409).json({ error: 'An account with that email already exists' })
 
-  const passwordHash = bcrypt.hashSync(password, 10)
+  const passwordHash = await bcrypt.hash(password, 10)
   const handle = makeHandle(displayName)
-  const { lastInsertRowid } = db
-    .prepare('INSERT INTO users (email, password_hash, display_name, handle) VALUES (?, ?, ?, ?)')
-    .run(email, passwordHash, displayName, handle)
+  const inserted = await db.query(
+    'INSERT INTO users (email, password_hash, display_name, handle) VALUES ($1, $2, $3, $4) RETURNING id',
+    [email, passwordHash, displayName, handle]
+  )
+  const userId = inserted.rows[0].id
 
-  setSessionCookie(res, lastInsertRowid)
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(lastInsertRowid)
-  res.status(201).json(toPublicUser(user))
+  setSessionCookie(res, userId)
+  const { rows } = await db.query('SELECT * FROM users WHERE id = $1', [userId])
+  res.status(201).json(toPublicUser(rows[0]))
 })
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
   const { email, password } = req.body
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email)
-  if (!user || !bcrypt.compareSync(password || '', user.password_hash)) {
+  const { rows } = await db.query('SELECT * FROM users WHERE email = $1', [email])
+  const user = rows[0]
+  if (!user || !(await bcrypt.compare(password || '', user.password_hash))) {
     return res.status(401).json({ error: 'Invalid email or password' })
   }
   setSessionCookie(res, user.id)
@@ -49,10 +52,10 @@ router.post('/logout', (req, res) => {
   res.json({ ok: true })
 })
 
-router.get('/me', requireAuth, (req, res) => {
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.userId)
-  if (!user) return res.status(401).json({ error: 'Not logged in' })
-  res.json(toPublicUser(user))
+router.get('/me', requireAuth, async (req, res) => {
+  const { rows } = await db.query('SELECT * FROM users WHERE id = $1', [req.userId])
+  if (!rows[0]) return res.status(401).json({ error: 'Not logged in' })
+  res.json(toPublicUser(rows[0]))
 })
 
 export default router

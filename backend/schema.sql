@@ -1,8 +1,8 @@
--- InvestCircle database schema.
+-- InvestCircle database schema (PostgreSQL).
 -- Tables added phase by phase per PHASES.md; currently covers Phase 1-4.
 
 CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
   display_name TEXT NOT NULL,
@@ -12,25 +12,25 @@ CREATE TABLE IF NOT EXISTS users (
   badge TEXT NOT NULL DEFAULT '',
   follower_count INTEGER NOT NULL DEFAULT 0,
   following_count INTEGER NOT NULL DEFAULT 0,
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS posts (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id),
   title TEXT NOT NULL,
   body TEXT NOT NULL,
   tickers TEXT NOT NULL DEFAULT '',
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS comments (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   post_id INTEGER NOT NULL REFERENCES posts(id),
   user_id INTEGER NOT NULL REFERENCES users(id),
   parent_id INTEGER REFERENCES comments(id),
   body TEXT NOT NULL,
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- One reaction per user per comment; 'insightful' or 'flame'.
@@ -49,14 +49,14 @@ CREATE TABLE IF NOT EXISTS votes (
 );
 
 CREATE TABLE IF NOT EXISTS news_items (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   source TEXT NOT NULL,
   headline TEXT NOT NULL,
   body TEXT NOT NULL,
   full_article TEXT NOT NULL DEFAULT '',
   tags TEXT NOT NULL DEFAULT '',
   image TEXT,
-  published_at TEXT NOT NULL DEFAULT (datetime('now'))
+  published_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Doubles as portfolio holdings: buy_price/buy_date/quantity are set when the
