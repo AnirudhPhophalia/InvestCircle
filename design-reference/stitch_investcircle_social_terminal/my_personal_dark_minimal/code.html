@@ -1,0 +1,329 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>InvestCircle - Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-container": "#91f78e",
+                      "inverse-primary": "#a5c8ff",
+                      "on-primary-fixed-variant": "#004786",
+                      "on-primary-container": "#fefcff",
+                      "surface-container-low": "#f6f3f2",
+                      "on-secondary-container": "#00731e",
+                      "error-container": "#ffdad6",
+                      "inverse-on-surface": "#f3f0ef",
+                      "surface-tint": "#005faf",
+                      "secondary-fixed": "#94f990",
+                      "primary-fixed-dim": "#a5c8ff",
+                      "on-tertiary-fixed-variant": "#930005",
+                      "error": "#ba1a1a",
+                      "on-background": "#1c1b1b",
+                      "on-tertiary-container": "#fffbff",
+                      "surface-container": "#f0eded",
+                      "secondary-fixed-dim": "#78dc77",
+                      "surface-container-high": "#eae7e7",
+                      "tertiary-fixed-dim": "#ffb4a9",
+                      "primary-container": "#2d76c8",
+                      "surface-dim": "#dcd9d9",
+                      "on-tertiary-fixed": "#410001",
+                      "inverse-surface": "#313030",
+                      "surface": "#fcf9f8",
+                      "on-surface-variant": "#414751",
+                      "secondary": "#006e1c",
+                      "surface-container-lowest": "#ffffff",
+                      "background": "#fcf9f8",
+                      "on-tertiary": "#ffffff",
+                      "outline": "#727783",
+                      "on-secondary-fixed": "#002204",
+                      "primary": "#005cab",
+                      "on-surface": "#1c1b1b",
+                      "outline-variant": "#c1c6d3",
+                      "on-primary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "surface-bright": "#fcf9f8",
+                      "on-primary-fixed": "#001c3a",
+                      "tertiary": "#b81311",
+                      "on-error": "#ffffff",
+                      "surface-container-highest": "#e5e2e1",
+                      "on-secondary": "#ffffff",
+                      "on-secondary-fixed-variant": "#005313",
+                      "tertiary-fixed": "#ffdad5",
+                      "primary-fixed": "#d4e3ff",
+                      "surface-variant": "#e5e2e1",
+                      "tertiary-container": "#dc3128"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "xs": "4px",
+                      "xl": "32px",
+                      "lg": "24px",
+                      "md": "16px",
+                      "gutter": "20px",
+                      "unit": "4px",
+                      "sm": "8px",
+                      "container-max": "1280px"
+              },
+              "fontFamily": {
+                      "data-mono": ["JetBrains Mono"],
+                      "label-caps": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "display": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "body-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "data-mono": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                      "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "display": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-[#121212] text-gray-100 font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- SideNavBar (Shared Component) -->
+<nav class="h-screen w-64 fixed left-0 top-0 border-r border-gray-800 bg-[#121212] flex flex-col h-full py-lg px-md z-20 hidden md:flex">
+<!-- Brand Header -->
+<div class="flex items-center gap-sm mb-xl px-sm">
+<div class="w-8 h-8 rounded-DEFAULT bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-[20px]">monitoring</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">InvestCircle</h1>
+<p class="font-label-caps text-label-caps text-gray-400 uppercase">Market Insights</p>
+</div>
+</div>
+<!-- Main Navigation -->
+<div class="flex-1 space-y-xs">
+<a class="flex items-center gap-md px-sm py-sm rounded-DEFAULT text-gray-400 hover:bg-gray-800 hover:text-gray-100 transition-colors opacity-90 transition-all duration-150" href="#">
+<span class="material-symbols-outlined">forum</span>
+<span class="font-body-md text-body-md">Discussions</span>
+</a>
+<a class="flex items-center gap-md px-sm py-sm rounded-DEFAULT text-gray-400 hover:bg-gray-800 hover:text-gray-100 transition-colors opacity-90 transition-all duration-150" href="#">
+<span class="material-symbols-outlined">newspaper</span>
+<span class="font-body-md text-body-md">News Reel</span>
+</a>
+<a class="flex items-center gap-md px-sm py-sm rounded-DEFAULT text-gray-400 hover:bg-gray-800 hover:text-gray-100 transition-colors opacity-90 transition-all duration-150" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="font-body-md text-body-md">My Portfolio</span>
+</a>
+</div>
+<!-- Footer Navigation -->
+<div class="mt-auto space-y-xs pt-lg border-t border-gray-800">
+<a class="flex items-center gap-md px-sm py-sm rounded-DEFAULT text-gray-400 hover:bg-gray-800 hover:text-gray-100 transition-colors" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="font-body-md text-body-md">Search</span>
+</a>
+<a class="flex items-center gap-md px-sm py-sm rounded-DEFAULT text-gray-400 hover:bg-gray-800 hover:text-gray-100 transition-colors" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span class="font-body-md text-body-md">Notifications</span>
+</a>
+<a class="flex items-center gap-md px-sm py-sm rounded-DEFAULT text-gray-400 hover:bg-gray-800 hover:text-gray-100 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+</div>
+</nav>
+<!-- TopAppBar (Shared Component) -->
+<header class="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] h-16 border-b border-gray-800 bg-[#121212] flex justify-between items-center px-lg z-10">
+<div class="flex items-center gap-md md:hidden">
+<span class="material-symbols-outlined text-gray-100 cursor-pointer">menu</span>
+<h1 class="font-headline-md text-headline-md font-extrabold text-primary">InvestCircle</h1>
+</div>
+<div class="hidden md:block">
+<!-- Breadcrumb / Context Title -->
+<h2 class="font-label-caps text-label-caps text-gray-400 uppercase tracking-wider">User Profile</h2>
+</div>
+<div class="flex items-center gap-md">
+<!-- Search bar placeholder -->
+<div class="hidden sm:flex items-center border border-gray-800 rounded-DEFAULT bg-[#1a1a1a] px-sm py-xs min-w-[200px]">
+<span class="material-symbols-outlined text-gray-500 text-[18px]">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-sm font-body-sm text-gray-100 w-full p-0 ml-sm placeholder:text-gray-500" placeholder="Search..." type="text">
+</div>
+<!-- Trailing Actions -->
+<button class="text-gray-400 hover:text-primary transition-colors scale-95 duration-100 p-xs">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-primary font-bold scale-95 duration-100 p-xs border-b-2 border-primary">
+<span class="material-symbols-outlined icon-fill">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="pt-16 md:ml-64 min-h-screen bg-[#121212] p-md lg:p-xl flex justify-center">
+<div class="w-full max-w-[800px] flex flex-col gap-xl">
+<!-- Profile Header Section -->
+<section class="flex flex-col md:flex-row items-start gap-lg pt-lg">
+<!-- Avatar -->
+<div class="w-24 h-24 rounded-DEFAULT border border-gray-800 overflow-hidden bg-gray-800 flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A professional corporate headshot of a female financial analyst in her late 30s. She has a confident, slight smile, wearing a tailored navy blazer over a crisp white shirt. The background is a bright, minimalist office setting with soft, diffused white lighting. The aesthetic is clean, modern, and aligned with a high-end financial platform in light mode." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBi010LHrvFczmiWST3nCbtVaP9piMnS-OMOmYgNZNIPfWKlPscmSEPv5_WIAH9GK3JhjCdDV-28yJXhTYo8seYw4e_myaJqmrJq6oFaxS_sCA6noPnobbkltmTzT2IvJn1Ho11zKjNcNevjeOQKuVvOfh1hmOpwwrW9VcoqFSbCjxnxaXTBhbj6h8WffYyFcGduGC17P56CvcpsDyqlH1nnRJGVbPjf1fkifX3hixsv_wikWYgf-47">
+</div>
+<!-- Info & Stats -->
+<div class="flex-1 w-full flex flex-col gap-md">
+<div class="flex justify-between items-start w-full">
+<div>
+<h1 class="font-display text-display text-gray-100 tracking-tight">Evelyn Vance</h1>
+<p class="font-body-md text-body-md text-gray-400 mt-xs">@evance_macro · Institutional Equities Analyst</p>
+</div>
+<button class="hidden sm:flex items-center gap-xs px-md py-sm bg-[#1a1a1a] border border-gray-800 rounded-DEFAULT text-gray-100 hover:bg-gray-800 hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+<span class="font-label-caps text-label-caps uppercase">Edit</span>
+</button>
+</div>
+<p class="font-body-md text-body-md text-gray-100 max-w-2xl leading-relaxed">
+                        Focusing on structural shifts in global supply chains and semiconductor cyclicality. Sharing high-conviction macro theses and fundamental deep dives.
+                    </p>
+<!-- Tabular Stats Row -->
+<div class="flex flex-wrap gap-lg md:gap-xl pt-sm border-t border-gray-800 mt-sm">
+<div class="flex flex-col gap-xs">
+<span class="font-label-caps text-label-caps text-gray-500 uppercase tracking-wider">Accuracy %</span>
+<span class="font-data-mono text-data-mono text-gray-100">84.2%</span>
+</div>
+<div class="flex flex-col gap-xs">
+<span class="font-label-caps text-label-caps text-gray-500 uppercase tracking-wider">Discussions</span>
+<span class="font-data-mono text-data-mono text-gray-100">142</span>
+</div>
+<div class="flex flex-col gap-xs">
+<span class="font-label-caps text-label-caps text-gray-500 uppercase tracking-wider">Followers</span>
+<span class="font-data-mono text-data-mono text-gray-100">12,409</span>
+</div>
+<div class="flex flex-col gap-xs">
+<span class="font-label-caps text-label-caps text-gray-500 uppercase tracking-wider">Following</span>
+<span class="font-data-mono text-data-mono text-gray-100">45</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Navigation Tabs -->
+<div class="border-b border-gray-800 flex gap-lg mt-md">
+<button class="font-label-caps text-label-caps uppercase pb-sm border-b-2 border-primary text-primary transition-colors tracking-wider">Posts</button>
+<button class="font-label-caps text-label-caps uppercase pb-sm border-b-2 border-transparent text-gray-400 hover:text-gray-100 transition-colors tracking-wider">Participation</button>
+<button class="font-label-caps text-label-caps uppercase pb-sm border-b-2 border-transparent text-gray-400 hover:text-gray-100 transition-colors tracking-wider">Watchlists</button>
+</div>
+<!-- Content Area (Feed) -->
+<div class="flex flex-col gap-md pb-xl">
+<!-- Post Card 1 -->
+<article class="border border-gray-800 rounded-DEFAULT bg-[#1a1a1a] p-md flex flex-col gap-sm">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-DEFAULT bg-primary-container text-white flex items-center justify-center font-label-caps text-label-caps">EV</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-gray-100">Evelyn Vance</span>
+<span class="font-body-sm text-body-sm text-gray-500">2 hours ago</span>
+</div>
+</div>
+<button class="text-gray-500 hover:text-gray-100 transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+<div class="mt-xs">
+<h3 class="font-headline-md text-headline-md text-gray-100 mb-sm">TSMC (TSM) Q3 Earnings Prep: Margin Resilience Underestimated</h3>
+<p class="font-body-md text-body-md text-gray-400 leading-relaxed">
+                            The street is overly focused on short-term smartphone inventory corrections. My channel checks indicate that N3 node yields are ramping faster than consensus models suggest. Expecting a +150bps beat on gross margin for Q3, driven by HPC demand offsetting weak consumer electronics.
+                        </p>
+</div>
+<!-- Action Bar -->
+<div class="flex items-center gap-md mt-sm pt-sm border-t border-gray-800">
+<button class="flex items-center gap-xs text-gray-500 hover:text-primary transition-colors group">
+<span class="material-symbols-outlined text-[18px] group-hover:icon-fill">thumb_up</span>
+<span class="font-data-mono text-body-sm">245</span>
+</button>
+<button class="flex items-center gap-xs text-gray-500 hover:text-gray-100 transition-colors">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span>
+<span class="font-data-mono text-body-sm">42</span>
+</button>
+<button class="flex items-center gap-xs text-gray-500 hover:text-gray-100 transition-colors ml-auto">
+<span class="material-symbols-outlined text-[18px]">bookmark</span>
+</button>
+</div>
+</article>
+<!-- Post Card 2 -->
+<article class="border border-gray-800 rounded-DEFAULT bg-[#1a1a1a] p-md flex flex-col gap-sm">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-DEFAULT bg-primary-container text-white flex items-center justify-center font-label-caps text-label-caps">EV</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-gray-100">Evelyn Vance</span>
+<span class="font-body-sm text-body-sm text-gray-500">Yesterday</span>
+</div>
+</div>
+<span class="font-label-caps text-label-caps text-secondary px-sm py-xs bg-secondary-container bg-opacity-20 rounded-DEFAULT border border-secondary border-opacity-30">Long Bias</span>
+</div>
+<div class="mt-xs">
+<h3 class="font-headline-md text-headline-md text-gray-100 mb-sm">ASML Order Intake Analysis</h3>
+<p class="font-body-md text-body-md text-gray-400 leading-relaxed">
+                            Analyzing the historical lag between ASML EUV bookings and downstream foundry Capex. The current divergence suggests a massive pull-forward in localized fabrication capacity building, particularly in the US and Japan.
+                        </p>
+<!-- Mini Data Table attached to post -->
+<div class="mt-md border border-gray-800 rounded-DEFAULT overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead class="bg-[#242424] border-b border-gray-800">
+<tr>
+<th class="py-xs px-sm font-label-caps text-label-caps text-gray-400 uppercase">Quarter</th>
+<th class="py-xs px-sm font-label-caps text-label-caps text-gray-400 uppercase text-right">EUV Orders (M)</th>
+<th class="py-xs px-sm font-label-caps text-label-caps text-gray-400 uppercase text-right">Implied Capex (B)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-b border-gray-800 hover:bg-gray-800 transition-colors">
+<td class="py-xs px-sm font-data-mono text-body-sm text-gray-100">Q1 '23</td>
+<td class="py-xs px-sm font-data-mono text-body-sm text-gray-100 text-right">€3,750</td>
+<td class="py-xs px-sm font-data-mono text-body-sm text-gray-100 text-right">$45.2</td>
+</tr>
+<tr class="hover:bg-gray-800 transition-colors">
+<td class="py-xs px-sm font-data-mono text-body-sm text-gray-100">Q2 '23</td>
+<td class="py-xs px-sm font-data-mono text-body-sm text-gray-100 text-right">€4,500</td>
+<td class="py-xs px-sm font-data-mono text-body-sm text-gray-100 text-right">$52.8</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Action Bar -->
+<div class="flex items-center gap-md mt-sm pt-sm border-t border-gray-800">
+<button class="flex items-center gap-xs text-gray-500 hover:text-primary transition-colors group">
+<span class="material-symbols-outlined text-[18px] group-hover:icon-fill">thumb_up</span>
+<span class="font-data-mono text-body-sm">892</span>
+</button>
+<button class="flex items-center gap-xs text-gray-500 hover:text-gray-100 transition-colors">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span>
+<span class="font-data-mono text-body-sm">115</span>
+</button>
+<button class="flex items-center gap-xs text-gray-500 hover:text-gray-100 transition-colors ml-auto">
+<span class="material-symbols-outlined text-[18px]">bookmark</span>
+</button>
+</div>
+</article>
+</div>
+</div>
+</main>
+</body></html>

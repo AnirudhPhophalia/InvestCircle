@@ -1,0 +1,279 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>InvestCircle - News Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#00731e",
+                        "primary-container": "#2d76c8",
+                        "tertiary-container": "#dc3128",
+                        "tertiary-fixed": "#ffdad5",
+                        "secondary": "#006e1c",
+                        "surface-tint": "#005faf",
+                        "outline": "#727783",
+                        "primary-fixed": "#d4e3ff",
+                        "on-tertiary": "#ffffff",
+                        "primary": "#005cab",
+                        "on-error": "#ffffff",
+                        "surface": "#fcf9f8",
+                        "primary-fixed-dim": "#a5c8ff",
+                        "surface-container-highest": "#e5e2e1",
+                        "on-primary-fixed": "#001c3a",
+                        "surface-dim": "#dcd9d9",
+                        "on-primary-fixed-variant": "#004786",
+                        "surface-bright": "#fcf9f8",
+                        "secondary-fixed-dim": "#78dc77",
+                        "on-tertiary-fixed-variant": "#930005",
+                        "error": "#ba1a1a",
+                        "inverse-on-surface": "#f3f0ef",
+                        "tertiary-fixed-dim": "#ffb4a9",
+                        "secondary-container": "#91f78e",
+                        "on-background": "#1c1b1b",
+                        "on-error-container": "#93000a",
+                        "surface-variant": "#e5e2e1",
+                        "on-tertiary-fixed": "#410001",
+                        "inverse-surface": "#313030",
+                        "secondary-fixed": "#94f990",
+                        "on-secondary": "#ffffff",
+                        "surface-container": "#f0eded",
+                        "inverse-primary": "#a5c8ff",
+                        "surface-container-low": "#f6f3f2",
+                        "on-tertiary-container": "#fffbff",
+                        "on-surface-variant": "#414751",
+                        "outline-variant": "#c1c6d3",
+                        "on-secondary-fixed": "#002204",
+                        "tertiary": "#b81311",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#eae7e7",
+                        "on-secondary-fixed-variant": "#005313",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "on-surface": "#1c1b1b",
+                        "background": "#fcf9f8",
+                        "on-primary-container": "#fefcff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "unit": "4px",
+                        "container-max": "1280px",
+                        "gutter": "20px",
+                        "sm": "8px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "data-mono": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "display": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "data-mono": ["14px", { "lineHeight": "20px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e5e2e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Top App Bar (Hidden on Mobile, Visible on Desktop) -->
+<header class="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] h-16 bg-surface dark:bg-background border-b border-outline-variant dark:border-outline z-20 flex justify-between items-center px-lg">
+<div class="flex items-center gap-md">
+<button class="md:hidden p-xs hover:bg-surface-container rounded transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">menu</span>
+</button>
+<button class="flex items-center gap-xs hover:bg-surface-container rounded p-xs transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" style="font-variation-settings: 'wght' 300, 'opsz' 20;">arrow_back</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Back</span>
+</button>
+</div>
+<div class="flex items-center gap-md">
+<button class="p-sm rounded hover:text-primary dark:hover:text-inverse-primary transition-colors hover:bg-surface-container">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+<button class="p-sm rounded hover:text-primary dark:hover:text-inverse-primary transition-colors hover:bg-surface-container">
+<span class="material-symbols-outlined text-on-surface-variant">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Side Nav Bar (Desktop Only) -->
+<nav class="h-screen w-64 fixed left-0 top-0 bg-surface-container-lowest dark:bg-inverse-surface border-r border-outline-variant dark:border-outline z-30 hidden md:flex flex-col py-lg px-md">
+<div class="flex items-center gap-sm mb-xl px-sm">
+<div class="w-8 h-8 rounded bg-primary flex items-center justify-center shrink-0">
+<span class="font-headline-md text-headline-md font-bold text-on-primary">I</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-inverse-primary leading-tight">InvestCircle</h1>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Market Insights</p>
+</div>
+</div>
+<div class="flex-1 space-y-xs overflow-y-auto custom-scrollbar">
+<a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container dark:hover:bg-surface-dim transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">forum</span>
+<span class="font-body-md text-body-md font-medium">Discussions</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm rounded-lg text-primary dark:text-inverse-primary border-l-2 border-primary font-bold bg-surface-container-low dark:bg-surface-variant opacity-90 transition-all duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">newspaper</span>
+<span class="font-body-md text-body-md font-medium">News Reel</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container dark:hover:bg-surface-dim transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">account_balance_wallet</span>
+<span class="font-body-md text-body-md font-medium">My Portfolio</span>
+</a>
+</div>
+<div class="mt-auto pt-lg border-t border-outline-variant space-y-xs">
+<a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container dark:hover:bg-surface-dim transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">search</span>
+<span class="font-body-sm text-body-sm">Search</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container dark:hover:bg-surface-dim transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+<span class="font-body-sm text-body-sm">Notifications</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-inverse-primary hover:bg-surface-container dark:hover:bg-surface-dim transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span class="font-body-sm text-body-sm">Settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 mt-16 p-md md:p-xl max-w-4xl mx-auto w-full pb-24 md:pb-xl">
+<!-- Article Header -->
+<article class="mb-xl">
+<div class="flex items-center gap-sm mb-md">
+<span class="font-label-caps text-label-caps text-on-surface-variant px-sm py-[2px] bg-surface-container-high rounded border border-outline-variant">REUTERS</span>
+<span class="font-body-sm text-body-sm text-outline">15m ago</span>
+</div>
+<h1 class="font-display text-display text-on-surface mb-md">Federal Reserve Indicates Pause on Rate Hikes Amid Cooling Inflation Data</h1>
+<div class="flex flex-wrap gap-xs mb-lg">
+<span class="font-label-caps text-label-caps text-on-surface-variant bg-surface-container px-sm py-[2px] rounded border border-outline-variant">MACRO</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant bg-surface-container px-sm py-[2px] rounded border border-outline-variant">FED</span>
+</div>
+<div class="w-full aspect-[21/9] rounded-lg border border-outline-variant overflow-hidden mb-lg bg-surface-container-low">
+<img class="w-full h-full object-cover" data-alt="A professional, high-resolution photograph of the Federal Reserve building in Washington D.C., viewed from a low angle. The lighting is bright and clear, reflecting a modern light-mode aesthetic. The sky is a crisp, clean white-blue. The architecture is detailed and sharp, conveying institutional authority. The image relies on natural colors with high contrast between the stone facade and shadows, avoiding any heavy shadows or dramatic gradients." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAqOr6gjG1l4BO_QVZVcNJoHJeEtPu8sC2vbua9-xE6QvfPYj6NDtEXYq8ZStK0aLj2JPSbxcdwe70ZAxIsd51efwEHdVl54b-_0tUp5CNcHjwBJDJ2j8gnH51amkxYU57LN5FE_PIwzaelmUqZDzdR60P6nlGlyWQqVjewyQQN0Otn3SpWUWAfYiNcTPrKv3xVifFQzXeOpGW4rgQ5_CqVBD8Bkd18UdwO1RExSGt72SeJG8xL3-Q">
+</div>
+<div class="prose prose-sm md:prose-base max-w-none font-body-md text-body-md text-on-surface-variant leading-relaxed mb-lg space-y-md">
+<p>WASHINGTON — In a move widely anticipated by financial markets, Federal Reserve officials signaled today that they are prepared to halt their aggressive campaign of interest rate increases, citing recent data that suggests inflation is steadily cooling down to the central bank's target levels.</p>
+<p>The policy statement, released following a two-day meeting of the Federal Open Market Committee (FOMC), struck a notably less hawkish tone than previous communications. Chairman Jerome Powell is expected to elaborate on the committee's consensus during his press conference later this afternoon.</p>
+<p>Market reactions were immediate, with major equity indices paring early losses and Treasury yields dipping slightly across the curve. The decision reflects growing confidence that the economy can achieve a "soft landing" without triggering a severe recession.</p>
+</div>
+<button class="w-full md:w-auto px-lg py-sm bg-primary text-on-primary font-body-md text-body-md font-medium rounded hover:bg-surface-tint transition-colors focus:outline-none focus:ring-1 focus:ring-primary focus:ring-offset-1 focus:ring-offset-surface">
+                Share Your Opinion
+            </button>
+</article>
+<!-- Reactions Section -->
+<section class="border-t border-outline-variant pt-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-md font-medium">What people are saying</h2>
+<div class="flex flex-col border border-outline-variant rounded-lg bg-surface-container-lowest overflow-hidden">
+<!-- Reaction Item 1 -->
+<div class="flex items-center gap-md p-md hover:bg-surface-container-low transition-colors group cursor-pointer">
+<div class="w-16 h-12 bg-surface-container-high rounded border border-outline-variant shrink-0 relative overflow-hidden">
+<img class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" data-alt="A close-up headshot of a professional financial analyst speaking, framed against a clean, bright minimalist office background. The lighting is soft and even, with no harsh shadows. The color palette is composed of cool grays and crisp whites. A subtle, sharp focus emphasizes professionalism and trust, perfectly suited for a high-density financial interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuqVPaVkCqTLaNKEUWwrRHeR4923bLPzJy5VkQaweW7nrydd59-JXqMutxNTPEDTvB4DeHYJKqSDOCOQs9JTS4t0HHJ1BPU8wsYOFLS7JATiDWb-DKKUizgNcwQATvThRL93kKs-IQWPNzZGqMeNZnZIjsUMvPjBQCWV4Xq50Udql5ZbzuaEgsD0ESkdRQdVEmEMgkDW2HrKDDZj2zzBAzF6bTUUFxOMud_mgVn_sjSbTNYVbAqsz0">
+<div class="absolute inset-0 flex items-center justify-center bg-black/10">
+<span class="material-symbols-outlined text-white text-lg" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-xs">
+<span class="font-body-md text-body-md font-medium text-on-surface truncate">Sarah Jenkins</span>
+<span class="material-symbols-outlined text-primary text-[14px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">45.2K followers</span>
+</div>
+</div>
+<!-- Divider -->
+<div class="h-px bg-outline-variant mx-md"></div>
+<!-- Reaction Item 2 -->
+<div class="flex items-center gap-md p-md hover:bg-surface-container-low transition-colors group cursor-pointer">
+<div class="w-16 h-12 bg-surface-container-high rounded border border-outline-variant shrink-0 relative overflow-hidden">
+<img class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" data-alt="A medium shot of an experienced portfolio manager gesturing while explaining a chart on a sleek monitor. The environment is a well-lit, contemporary trading floor with a light-mode aesthetic—white walls and subtle grey accents. The image is crisp, detailed, and avoids any dramatic or moody lighting, focusing on clarity and professional utility." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCX0DpdNe-npnFlaNKOTLVw4p0ICl4t-xv0GXxOeCu1WhBlV00oo0xFIqH_Gj0kH_mLEBilFsLEcYzBtp21dQ-Z8_We660zLnwwl_Ek5gyBnFR1uh7RnQtg9S49UZ3htM_EGFT2PJIka79RwFHNR2KgvaoRF9MwVZzNGyfXS71-a-YyBGdVClETuF5qPRKSW-hhWLP6varJQmKRfPlBG71FBbC8adqEtk2QywVTWooZCOxFc8Kx3p0W">
+<div class="absolute inset-0 flex items-center justify-center bg-black/10">
+<span class="material-symbols-outlined text-white text-lg" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-xs">
+<span class="font-body-md text-body-md font-medium text-on-surface truncate">Marcus Vance</span>
+<span class="material-symbols-outlined text-primary text-[14px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">12.4K followers</span>
+</div>
+</div>
+<!-- Divider -->
+<div class="h-px bg-outline-variant mx-md"></div>
+<!-- Reaction Item 3 -->
+<div class="flex items-center gap-md p-md hover:bg-surface-container-low transition-colors group cursor-pointer">
+<div class="w-16 h-12 bg-surface-container-high rounded border border-outline-variant shrink-0 relative overflow-hidden">
+<img class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" data-alt="A clear, bright video thumbnail showing an economic researcher at a minimalist desk setup. The lighting is high-key and pristine, emphasizing a stark white and light gray palette. There are no heavy gradients or dramatic shadows. The professional's posture is attentive, conveying analytical rigor suitable for an institutional trading platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwJuzG7-AqVgPgxSm_9t4XxhenJ9RsliN8VV4M8HNhtBiDni_TmRS0kyhTJs212diN9Jq0P9vig-3_8cFGUkxN5qz_Gn4W18lSKMKnz9vHQUnadJEGbS7fE9sWOXuNMeZYTc5hQLK2t3xRt8x_pr1BgB9gIS-5HP93CeCMZ4wOwF3KkhBvjSrL10kkEd1a-PGm0HaX_salnsXo1sThFPD47dntrnZkIA0KlVm2IELnSvwTI8b5ESb7">
+<div class="absolute inset-0 flex items-center justify-center bg-black/10">
+<span class="material-symbols-outlined text-white text-lg" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-xs">
+<span class="font-body-md text-body-md font-medium text-on-surface truncate">Elena Rostova</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">8.9K followers</span>
+</div>
+</div>
+<!-- Footer Link -->
+<div class="p-sm text-center bg-surface-container-lowest">
+<button class="font-body-sm text-body-sm font-medium text-primary hover:text-surface-tint transition-colors">View all reactions</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Nav Bar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface border-t border-outline-variant z-30 flex justify-around items-center h-16 px-sm pb-safe">
+<a class="flex flex-col items-center gap-xs p-sm text-on-surface-variant" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">forum</span>
+</a>
+<a class="flex flex-col items-center gap-xs p-sm text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">newspaper</span>
+</a>
+<a class="flex flex-col items-center gap-xs p-sm text-on-surface-variant" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">account_balance_wallet</span>
+</a>
+<a class="flex flex-col items-center gap-xs p-sm text-on-surface-variant" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">search</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>InvestCircle - Discussions</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#91f78e",
+                        "inverse-primary": "#a5c8ff",
+                        "on-primary-fixed-variant": "#004786",
+                        "on-primary-container": "#fefcff",
+                        "surface-container-low": "#181818",
+                        "on-secondary-container": "#00731e",
+                        "error-container": "#ffdad6",
+                        "inverse-on-surface": "#f3f0ef",
+                        "surface-tint": "#005faf",
+                        "secondary-fixed": "#94f990",
+                        "primary-fixed-dim": "#a5c8ff",
+                        "on-tertiary-fixed-variant": "#930005",
+                        "error": "#ba1a1a",
+                        "on-background": "#e5e5e5",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-container": "#202020",
+                        "secondary-fixed-dim": "#78dc77",
+                        "surface-container-high": "#2a2a2a",
+                        "tertiary-fixed-dim": "#ffb4a9",
+                        "primary-container": "#2d76c8",
+                        "surface-dim": "#121212",
+                        "on-tertiary-fixed": "#410001",
+                        "inverse-surface": "#313030",
+                        "surface": "#121212",
+                        "on-surface-variant": "#a3a3a3",
+                        "secondary": "#006e1c",
+                        "surface-container-lowest": "#121212",
+                        "background": "#121212",
+                        "on-tertiary": "#ffffff",
+                        "outline": "#555555",
+                        "on-secondary-fixed": "#002204",
+                        "primary": "#3b82f6",
+                        "on-surface": "#e5e5e5",
+                        "outline-variant": "#2a2a2a",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#202020",
+                        "on-primary-fixed": "#001c3a",
+                        "tertiary": "#b81311",
+                        "on-error": "#ffffff",
+                        "surface-container-highest": "#303030",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#005313",
+                        "tertiary-fixed": "#ffdad5",
+                        "primary-fixed": "#d4e3ff",
+                        "surface-variant": "#1e1e1e",
+                        "tertiary-container": "#dc3128"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "gutter": "20px",
+                        "unit": "4px",
+                        "sm": "8px",
+                        "container-max": "1280px"
+                    },
+                    "fontFamily": {
+                        "data-mono": ["JetBrains Mono"],
+                        "label-caps": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "data-mono": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #121212; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .icon-fill { font-variation-settings: 'FILL' 1; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased overflow-y-scroll">
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 bg-surface dark:bg-background border-b border-outline-variant flex justify-between items-center px-lg z-50">
+<div class="flex items-center gap-sm">
+<h1 class="font-headline-md text-headline-md font-extrabold text-primary cursor-pointer hover:opacity-80 transition-opacity">InvestCircle</h1>
+</div>
+<!-- Search Bar -->
+<div class="flex-1 max-w-md mx-md">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-xl pr-md py-sm bg-surface-container-lowest border border-outline-variant rounded-DEFAULT focus:border-primary focus:ring-0 font-body-sm text-body-sm placeholder:text-outline transition-colors outline-none h-8 text-on-surface" placeholder="Search markets, tickers, discussions..." type="text">
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button aria-label="Notifications" class="text-on-surface-variant hover:text-primary transition-colors hover:scale-95 duration-100 flex items-center justify-center h-8 w-8 rounded-full">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button aria-label="User Profile" class="text-on-surface-variant hover:text-primary transition-colors hover:scale-95 duration-100 flex items-center justify-center h-8 w-8 rounded-full">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</header>
+<!-- SideNavBar -->
+<nav class="h-screen w-64 fixed left-0 top-0 bg-surface-container-lowest dark:bg-background border-r border-outline-variant flex flex-col py-lg px-md z-40">
+<div class="mb-xl px-sm flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-headline-md text-headline-md">
+                I
+            </div>
+<div>
+<div class="font-headline-md text-headline-md font-bold text-primary leading-tight">InvestCircle</div>
+<div class="font-label-caps text-label-caps text-outline">Market Insights</div>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-sm">
+<!-- Active Tab: Discussions -->
+<a class="flex items-center gap-md px-md py-sm text-primary border-l-2 border-primary font-bold bg-surface-container-low transition-colors group" href="#">
+<span class="material-symbols-outlined icon-fill opacity-90 transition-all duration-150" data-icon="forum">forum</span>
+<span class="font-body-md text-body-md opacity-90 transition-all duration-150">Discussions</span>
+</a>
+<!-- Inactive Tabs -->
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors group border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" data-icon="newspaper">newspaper</span>
+<span class="font-body-md text-body-md">News Reel</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors group border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-body-md text-body-md">My Portfolio</span>
+</a>
+</div>
+<div class="mt-auto border-t border-outline-variant pt-md flex flex-col gap-sm">
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors group border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" data-icon="search">search</span>
+<span class="font-body-md text-body-md">Search</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors group border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" data-icon="notifications">notifications</span>
+<span class="font-body-md text-body-md">Notifications</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors group border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" data-icon="settings">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-64 mt-16 p-lg max-w-container-max mx-auto flex justify-center">
+<!-- Single Center Column -->
+<div class="w-full max-w-3xl flex flex-col gap-md">
+<!-- Sort Tabs -->
+<div class="bg-surface-container-lowest border border-outline-variant p-sm flex items-center gap-md mb-xs">
+<button class="font-label-caps text-label-caps px-md py-xs text-primary border-b-2 border-primary">HOT</button>
+<button class="font-label-caps text-label-caps px-md py-xs text-on-surface-variant hover:text-primary transition-colors border-b-2 border-transparent hover:border-outline-variant">NEW</button>
+<button class="font-label-caps text-label-caps px-md py-xs text-on-surface-variant hover:text-primary transition-colors border-b-2 border-transparent hover:border-outline-variant">TOP</button>
+<!-- Spacer -->
+<div class="flex-1"></div>
+<!-- Create Post Button -->
+<button class="bg-primary text-on-primary font-label-caps text-label-caps px-md py-xs rounded-DEFAULT hover:bg-opacity-90 transition-all">NEW POST</button>
+</div>
+<!-- Feed Container -->
+<div class="flex flex-col gap-sm">
+<!-- Post 1 -->
+<article class="bg-surface-container-lowest border border-outline-variant flex transition-colors hover:bg-surface-container-low cursor-pointer">
+<!-- Vote Column -->
+<div class="w-12 bg-surface-container-low flex flex-col items-center py-sm border-r border-outline-variant">
+<button class="text-outline hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">arrow_upward</span></button>
+<span class="font-data-mono text-data-mono text-on-surface my-xs">1.2k</span>
+<button class="text-outline hover:text-tertiary transition-colors"><span class="material-symbols-outlined text-[20px]">arrow_downward</span></button>
+</div>
+<!-- Content Column -->
+<div class="p-md flex-1 flex flex-col gap-sm">
+<!-- Meta Header -->
+<div class="flex items-center gap-xs font-body-sm text-body-sm text-outline">
+<span class="font-bold text-on-surface">u/ValueInvestor99</span>
+<span class="px-xs py-[2px] bg-secondary/10 text-secondary border border-secondary/20 rounded-DEFAULT text-[10px] leading-none uppercase tracking-wider">Verified Analyst</span>
+<span>•</span>
+<span>2 hours ago</span>
+</div>
+<!-- Title & Ticker -->
+<div class="flex items-start justify-between gap-md">
+<h2 class="font-headline-md text-headline-md text-on-surface">TCS Q3 Results Analysis: Margins expand despite macroeconomic headwinds. Is it a buy?</h2>
+<span class="font-data-mono text-data-mono px-sm py-xs bg-surface-variant border border-outline-variant text-on-surface">TCS</span>
+</div>
+<!-- Body Snippet -->
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-3">
+                            Taking a deep dive into the recent quarterly earnings for Tata Consultancy Services. While top-line growth was muted as expected given the broader IT sector slowdown, their operational efficiency metrics are showing significant improvement. Operating margins expanded by 50 bps sequentially, which is impressive given the wage hikes implemented earlier this year. Order book remains solid at $8.1B. I'm maintaining my overweight stance, but want to hear the community's thoughts on the valuation multiples at these levels.
+                        </p>
+<!-- Action Footer -->
+<div class="flex items-center gap-md mt-sm border-t border-outline-variant pt-sm">
+<button class="flex items-center gap-xs text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
+<span class="font-label-caps text-label-caps">142 COMMENTS</span>
+</button>
+<button class="flex items-center gap-xs text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">share</span>
+<span class="font-label-caps text-label-caps">SHARE</span>
+</button>
+<button class="flex items-center gap-xs text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">bookmark_border</span>
+<span class="font-label-caps text-label-caps">SAVE</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Post 2 -->
+<article class="bg-surface-container-lowest border border-outline-variant flex transition-colors hover:bg-surface-container-low cursor-pointer">
+<!-- Vote Column -->
+<div class="w-12 bg-surface-container-low flex flex-col items-center py-sm border-r border-outline-variant">
+<button class="text-outline hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">arrow_upward</span></button>
+<span class="font-data-mono text-data-mono text-on-surface my-xs">854</span>
+<button class="text-outline hover:text-tertiary transition-colors"><span class="material-symbols-outlined text-[20px]">arrow_downward</span></button>
+</div>
+<!-- Content Column -->
+<div class="p-md flex-1 flex flex-col gap-sm">
+<!-- Meta Header -->
+<div class="flex items-center gap-xs font-body-sm text-body-sm text-outline">
+<span class="font-bold text-on-surface">u/MacroTrader_X</span>
+<span class="px-xs py-[2px] bg-primary/10 text-primary border border-primary/20 rounded-DEFAULT text-[10px] leading-none uppercase tracking-wider">Contributor</span>
+<span>•</span>
+<span>5 hours ago</span>
+</div>
+<!-- Title & Ticker -->
+<div class="flex items-start justify-between gap-md">
+<h2 class="font-headline-md text-headline-md text-on-surface">Fed rate hold impact on banking sector Net Interest Margins (NIM)</h2>
+<div class="flex gap-xs">
+<span class="font-data-mono text-data-mono px-sm py-xs bg-surface-variant border border-outline-variant text-on-surface">JPM</span>
+<span class="font-data-mono text-data-mono px-sm py-xs bg-surface-variant border border-outline-variant text-on-surface">BAC</span>
+</div>
+</div>
+<!-- Body Snippet -->
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-3">
+                            The recent 'higher for longer' rhetoric from Powell is reshaping expectations for regional and major banks. While asset yields are repricing upwards, deposit betas are catching up faster than modeled. Looking at the latest deposit flow data, we might see peak NIM in Q2 rather than Q4. How are you positioning banking exposure in anticipation of this margin compression? JPM seems somewhat insulated due to their wholesale banking mix, but others might struggle.
+                        </p>
+<!-- Action Footer -->
+<div class="flex items-center gap-md mt-sm border-t border-outline-variant pt-sm">
+<button class="flex items-center gap-xs text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
+<span class="font-label-caps text-label-caps">89 COMMENTS</span>
+</button>
+<button class="flex items-center gap-xs text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">share</span>
+<span class="font-label-caps text-label-caps">SHARE</span>
+</button>
+<button class="flex items-center gap-xs text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">bookmark_border</span>
+<span class="font-label-caps text-label-caps">SAVE</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Post 3 (Short body) -->
+<article class="bg-surface-container-lowest border border-outline-variant flex transition-colors hover:bg-surface-container-low cursor-pointer">
+<!-- Vote Column -->
+<div class="w-12 bg-surface-container-low flex flex-col items-center py-sm border-r border-outline-variant">
+<button class="text-outline hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">arrow_upward</span></button>
+<span class="font-data-mono text-data-mono text-on-surface my-xs">432</span>
+<button class="text-outline hover:text-tertiary transition-colors"><span class="material-symbols-outlined text-[20px]">arrow_downward</span></button>
+</div>
+<!-- Content Column -->
+<div class="p-md flex-1 flex flex-col gap-sm">
+<!-- Meta Header -->
+<div class="flex items-center gap-xs font-body-sm text-body-sm text-outline">
+<span class="font-bold text-on-surface">u/RetailBull</span>
+<span>•</span>
+<span>8 hours ago</span>
+</div>
+<!-- Title & Ticker -->
+<div class="flex items-start justify-between gap-md">
+<h2 class="font-headline-md text-headline-md text-on-surface">Technical breakout observed in NVDA post-consolidation phase. Volume confirming.</h2>
+<span class="font-data-mono text-data-mono px-sm py-xs bg-surface-variant border border-outline-variant text-on-surface">NVDA</span>
+</div>
+<!-- Body Snippet -->
+<p class="font-body-md text-body-md text-on-surface-variant">
+                            RSI cooled off to 45 and bounced. MACD crossover imminent on the daily chart. Watching the $850 resistance level closely today.
+                        </p>
+<!-- Action Footer -->
+<div class="flex items-center gap-md mt-sm border-t border-outline-variant pt-sm">
+<button class="flex items-center gap-xs text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
+<span class="font-label-caps text-label-caps">56 COMMENTS</span>
+</button>
+<button class="flex items-center gap-xs text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">share</span>
+<span class="font-label-caps text-label-caps">SHARE</span>
+</button>
+<button class="flex items-center gap-xs text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">bookmark_border</span>
+<span class="font-label-caps text-label-caps">SAVE</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Load More -->
+<button class="w-full py-sm border border-outline-variant bg-surface-container-low text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container transition-colors mt-sm">
+                    LOAD MORE DISCUSSIONS
+                </button>
+</div>
+</div>
+</main>
+</body></html>
