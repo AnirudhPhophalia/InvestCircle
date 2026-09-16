@@ -1,0 +1,211 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>InvestCircle — How It Works</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  @page { size: A4; margin: 10mm 12mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: #1a1f29;
+    line-height: 1.32;
+    font-size: 10.7px;
+    margin: 0;
+  }
+  h1 { font-size: 19px; margin: 0 0 1px; }
+  .subtitle { color: #5b6472; font-size: 10.5px; margin-bottom: 6px; }
+  .top { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 2px solid #2f6feb; padding-bottom: 5px; margin-bottom: 8px; }
+  .pills span { display: inline-block; margin-left: 4px; padding: 2px 8px; border-radius: 10px; background: #eef4ff; color: #123a7a; font-size: 9.5px; }
+  h2 {
+    font-size: 12.5px;
+    margin: 9px 0 4px;
+    color: #123a7a;
+    page-break-after: avoid;
+  }
+  h3 { font-size: 10.7px; margin: 6px 0 2px; color: #1a1f29; page-break-after: avoid; }
+  p { margin: 3px 0; }
+  .callout {
+    background: #eef4ff;
+    border-left: 3px solid #2f6feb;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin: 5px 0;
+    font-size: 9.8px;
+  }
+  .callout b { color: #123a7a; }
+  table { border-collapse: collapse; width: 100%; margin: 4px 0; font-size: 9.6px; }
+  th, td { border: 1px solid #d7dce3; padding: 2px 6px; text-align: left; }
+  th { background: #f2f5f9; }
+  code, .mono { font-family: "SF Mono", Menlo, monospace; background: #f2f5f9; padding: 0 3px; border-radius: 3px; font-size: 9.3px; }
+  .diagram { margin: 4px 0; text-align: center; page-break-inside: avoid; }
+  .diagram svg { max-width: 100%; }
+  .diagram.small svg { max-width: 92%; }
+  .col2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+  .col3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 8px; }
+  .page2 { page-break-before: always; }
+  ul { margin: 3px 0; padding-left: 15px; }
+  li { margin: 1px 0; }
+  .footer { text-align: center; color: #9aa1ab; font-size: 8.5px; margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div>
+    <h1>InvestCircle — How It Works</h1>
+    <div class="subtitle">Tech stack &amp; flow, in plain language, for the team</div>
+  </div>
+  <div class="pills"><span>React+Vite</span><span>Express</span><span>PostgreSQL</span><span>JWT</span><span>Vercel</span></div>
+</div>
+
+<h2>1. The big picture</h2>
+<p>The browser (frontend) never talks to the database directly — it always asks the Express server, and only the server reads/writes the database. That's why passwords and business rules live on the backend, never in code shipped to the browser.</p>
+<div class="diagram small">
+<pre class="mermaid">
+flowchart LR
+  A["Browser<br/>React App"] -->|"fetch() request"| B["Express Backend"]
+  B -->|"SQL query"| C[("PostgreSQL")]
+  C -->|"rows"| B
+  B -->|"JSON response"| A
+</pre>
+</div>
+<table>
+<tr><th>Layer</th><th>Choice</th><th>Why</th></tr>
+<tr><td>Frontend</td><td>React+Vite, Tailwind, React Router</td><td>Fast dev server, minimal config</td></tr>
+<tr><td>Backend</td><td>Node.js + Express</td><td>One small server, easy to read</td></tr>
+<tr><td>Database</td><td>PostgreSQL, plain SQL (no ORM)</td><td>Just SQL, nothing extra to learn</td></tr>
+<tr><td>Auth</td><td>bcrypt + JWT in a cookie</td><td>No session table to manage</td></tr>
+<tr><td>Hosting</td><td>Vercel, one project, both halves</td><td>Same domain → no CORS/cookie issues</td></tr>
+</table>
+
+<h2>2. Logging in — the JWT flow</h2>
+<div class="diagram small">
+<pre class="mermaid">
+flowchart LR
+  A["User submits<br/>email + password"] --> B["bcrypt.compare<br/>checks password"] --> C["jwt.sign<br/>{ userId }, secret"] --> D["httpOnly cookie<br/>ic_session sent back"]
+</pre>
+</div>
+<div class="col2">
+<div>
+<p><b>Password:</b> never stored as text — only a one-way <code>bcrypt</code> hash. Even a stolen database can't be reversed back into passwords.</p>
+<p><b>JWT:</b> a signed token holding just the user's id. Signed = server can prove it made it; nobody can forge one without the secret key.</p>
+</div>
+<div>
+<div class="callout"><b>Why not a session table?</b> Verifying a JWT is pure math (check the signature) — no database lookup needed on every request. One less table to keep in sync.</div>
+</div>
+</div>
+
+<h2>3. Every request after login</h2>
+<div class="diagram small">
+<pre class="mermaid">
+flowchart LR
+  A["Request comes in"] --> B{"Cookie valid?"}
+  B -- No --> C["401 — logged out"]
+  B -- Yes --> D["req.userId set<br/>→ route runs"]
+</pre>
+</div>
+<div class="col2">
+<div>
+<p>The browser attaches the cookie automatically to every request (frontend just sets <code>credentials: 'include'</code>). No token handling in frontend code at all.</p>
+</div>
+<div>
+<p><code>requireAuth</code> blocks the route if the cookie's missing/invalid. <code>optionalAuth</code> never blocks — used for read-only pages. <b>Logout</b> just deletes the cookie — nothing to clean up server-side.</p>
+</div>
+</div>
+
+<div class="page2">
+
+<h2>4. The database</h2>
+<div class="col2">
+<div>
+<div class="diagram small">
+<pre class="mermaid">
+flowchart LR
+  users --> posts
+  users --> comments
+  users --> votes
+  posts --> comments
+  posts --> votes
+  comments --> comment_reactions
+  users --> watchlist_items
+</pre>
+</div>
+</div>
+<div>
+<p>One PostgreSQL database (<code>backend/schema.sql</code>), tables linked by IDs. <b>No ORM</b> — hand-written SQL with <code>$1,$2</code> placeholders (blocks SQL injection). <b>No migration tool</b> — <code>CREATE TABLE IF NOT EXISTS</code> runs on every startup. Counts (votes, reactions) are computed live with <code>SUM()</code>, never stored as a running number.</p>
+</div>
+</div>
+
+<h2>5. How each feature works</h2>
+<div class="col3">
+<div>
+<h3>Discussions</h3>
+<div class="diagram small">
+<pre class="mermaid">
+flowchart TD
+  A[Post / Upvote] --> B["POST /api/posts<br/>or /:id/vote"]
+  B --> C[("posts / votes")]
+</pre>
+</div>
+<p>Voting is an upsert — one vote row per user per post.</p>
+</div>
+<div>
+<h3>News Reel</h3>
+<div class="diagram small">
+<pre class="mermaid">
+flowchart TD
+  A["Give Your Voice"] --> B["Record clip<br/>+ Bullish/Bearish<br/>+ comment"]
+  B --> C["Shown on Reel &amp;<br/>Read More page"]
+</pre>
+</div>
+<p>Recording stays in the browser — kept simple for the demo.</p>
+</div>
+<div>
+<h3>Portfolio</h3>
+<div class="diagram small">
+<pre class="mermaid">
+flowchart TD
+  A["Seeded holdings"] --> B["Joined with<br/>seeded prices"]
+  B --> C["Live P&amp;L +<br/>summary cards"]
+</pre>
+</div>
+<p>No live market feed by design — clearly labeled demo data.</p>
+</div>
+</div>
+
+<h2>6. Deployment &amp; codebase layout</h2>
+<div class="col2">
+<div>
+<div class="diagram small">
+<pre class="mermaid">
+flowchart LR
+  subgraph V["One Vercel Project"]
+    A["Frontend build"]
+    B["Backend serverless<br/>function api/index.js"]
+  end
+  A -->|"/api/* rewrite"| B
+  B --> C[("Vercel Postgres")]
+</pre>
+</div>
+<p>Same domain for both halves → the login flow above works identically in dev and production; only <code>DATABASE_URL</code> and <code>JWT_SECRET</code> differ.</p>
+</div>
+<div>
+<p><b>Frontend</b> — organized by feature, not file type:</p>
+<ul>
+  <li><code>features/</code> — <code>auth/</code>, <code>discussions/</code>, <code>news/</code>, <code>portfolio/</code></li>
+  <li><code>shared/</code> — <code>components/</code>, <code>context/</code>, <code>lib/</code> (used by 2+ features)</li>
+</ul>
+<p><b>Backend</b> mirrors it by resource: <code>routes/auth.js</code>, <code>posts.js</code>, <code>news.js</code>, <code>watchlist.js</code> — one file per feature.</p>
+</div>
+</div>
+
+<div class="footer">InvestCircle — Software Engineering group project</div>
+</div>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose', flowchart: { htmlLabels: true }, themeCSS: '.node rect, .node polygon { rx: 3; }' });
+</script>
+</body>
+</html>

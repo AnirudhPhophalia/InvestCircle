@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { api } from '../lib/api.js'
+import { api } from '../../shared/lib/api.js'
 
 export default function NewPost() {
   const navigate = useNavigate()

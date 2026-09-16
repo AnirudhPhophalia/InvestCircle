@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { api } from '../lib/api.js'
-import { timeAgo } from '../lib/time.js'
-import { findKnownTicker } from '../lib/fundamentals.js'
-import { useActiveTicker } from '../context/TickerContext.jsx'
-import { useVoiceReactions } from '../context/VoiceReactionsContext.jsx'
-import CameraRecorder from '../components/CameraRecorder.jsx'
-import CompanyFundamentals from '../components/CompanyFundamentals.jsx'
-import VoiceStoryViewer from '../components/VoiceStoryViewer.jsx'
-import VoiceReactorList from '../components/VoiceReactorList.jsx'
+import { api } from '../../shared/lib/api.js'
+import { timeAgo } from '../../shared/lib/time.js'
+import { findKnownTicker } from '../../shared/lib/fundamentals.js'
+import { useActiveTicker } from '../../shared/context/TickerContext.jsx'
+import { useVoiceReactions } from '../../shared/context/VoiceReactionsContext.jsx'
+import CameraRecorder from './CameraRecorder.jsx'
+import CompanyFundamentals from '../portfolio/CompanyFundamentals.jsx'
+import VoiceStoryViewer from './VoiceStoryViewer.jsx'
+import VoiceReactorList from './VoiceReactorList.jsx'
 
 export default function NewsReel() {
   const navigate = useNavigate()

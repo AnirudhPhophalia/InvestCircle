@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { FUNDAMENTALS, TICKERS } from '../lib/fundamentals.js'
-import { useActiveTicker } from '../context/TickerContext.jsx'
+import { FUNDAMENTALS, TICKERS } from '../../shared/lib/fundamentals.js'
+import { useActiveTicker } from '../../shared/context/TickerContext.jsx'
 
 function Metric({ label, value }) {
   return (

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { api } from '../lib/api.js'
+import { api } from '../../shared/lib/api.js'
 
 export default function VoteButtons({ post, onChange }) {
   const [busy, setBusy] = useState(false)

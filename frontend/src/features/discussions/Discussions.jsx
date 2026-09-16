@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { api } from '../lib/api.js'
-import PostCard from '../components/PostCard.jsx'
+import { api } from '../../shared/lib/api.js'
+import PostCard from './PostCard.jsx'
 
 const TABS = [
   { key: 'hot', label: 'HOT' },

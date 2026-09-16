@@ -165,12 +165,19 @@ Seeded by `node seed.js`, all with password `password123`:
 
 ```
 InvestCircle/
-  frontend/            React + Vite app
-  backend/             Express API + PostgreSQL (schema.sql, seed.js, routes/, app.js)
+  frontend/
+    src/
+      features/        One folder per feature — auth, discussions, news, portfolio
+      shared/           Cross-feature code — components/, context/, lib/
+      App.jsx, main.jsx Entry point and route table
+  backend/             Express API + PostgreSQL
+    routes/            One file per resource — auth, posts, news, users, watchlist
+    app.js, server.js  Express app setup / local server entry point
+    schema.sql, seed.js, db.js
   api/index.js         Vercel serverless entry point (imports backend/app.js)
   vercel.json          Vercel build/routing config for the combined deployment
   design-reference/    Original Stitch UI export — reference only
-  docs/                Build notes and phase plan for this project
+  docs/                Architecture doc, build notes, and phase plan for this project
   journals/            Per-teammate weekly dev journals
 ```
 

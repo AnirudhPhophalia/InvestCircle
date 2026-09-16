@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext.jsx'
-import { api } from '../lib/api.js'
-import { timeAgo } from '../lib/time.js'
-import { FUNDAMENTALS, TICKERS, numericPrice } from '../lib/fundamentals.js'
-import Avatar from '../components/Avatar.jsx'
-import PostCard from '../components/PostCard.jsx'
+import { useAuth } from '../../shared/context/AuthContext.jsx'
+import { api } from '../../shared/lib/api.js'
+import { timeAgo } from '../../shared/lib/time.js'
+import { FUNDAMENTALS, TICKERS, numericPrice } from '../../shared/lib/fundamentals.js'
+import Avatar from '../../shared/components/Avatar.jsx'
+import PostCard from '../discussions/PostCard.jsx'
 
 const TABS = ['Posts', 'Participation', 'Portfolio']
 

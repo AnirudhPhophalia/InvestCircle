@@ -1,4 +1,4 @@
-import { tierFor, TIER_GLOW } from '../lib/voiceReactions.js'
+import { tierFor, TIER_GLOW } from '../../shared/lib/voiceReactions.js'
 
 // The "N gave their voice" avatar/name row — shared between the live feed and a
 // single news article's detail page. Clicking any reactor opens the story viewer

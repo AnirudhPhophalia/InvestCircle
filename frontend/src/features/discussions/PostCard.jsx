@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import VoteButtons from './VoteButtons.jsx'
-import { timeAgo } from '../lib/time.js'
+import { timeAgo } from '../../shared/lib/time.js'
 
 export default function PostCard({ post, onVoteChange }) {
   const tickers = post.tickers ? post.tickers.split(',').filter(Boolean) : []

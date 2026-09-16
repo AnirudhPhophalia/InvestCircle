@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { api } from '../lib/api.js'
-import { timeAgo } from '../lib/time.js'
-import { findKnownTicker } from '../lib/fundamentals.js'
-import { useActiveTicker } from '../context/TickerContext.jsx'
-import VoteButtons from '../components/VoteButtons.jsx'
-import Avatar from '../components/Avatar.jsx'
-import CompanyFundamentals from '../components/CompanyFundamentals.jsx'
+import { api } from '../../shared/lib/api.js'
+import { timeAgo } from '../../shared/lib/time.js'
+import { findKnownTicker } from '../../shared/lib/fundamentals.js'
+import { useActiveTicker } from '../../shared/context/TickerContext.jsx'
+import VoteButtons from './VoteButtons.jsx'
+import Avatar from '../../shared/components/Avatar.jsx'
+import CompanyFundamentals from '../portfolio/CompanyFundamentals.jsx'
 
 function groupComments(flat) {
   const byId = new Map(flat.map((c) => [c.id, { ...c, replies: [] }]))
