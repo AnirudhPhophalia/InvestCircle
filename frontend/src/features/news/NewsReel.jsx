@@ -17,6 +17,7 @@ export default function NewsReel() {
   const [params] = useSearchParams()
   const q = params.get('q') || ''
   const [news, setNews] = useState(null)
+  const [liveItems, setLiveItems] = useState([])
   const [error, setError] = useState('')
   const [index, setIndex] = useState(0)
   const [dragX, setDragX] = useState(0)
@@ -39,19 +40,53 @@ export default function NewsReel() {
       .catch((e) => setError(e.message))
   }, [q, seedIfNeeded])
 
+  // Pull real-time headlines from Finnhub (via our backend) and merge them in
+  // ahead of the seeded cards. Refetches every 60s so the reel stays current.
+  useEffect(() => {
+    let cancelled = false
+    function fetchLive() {
+      api
+        .get('/news/live')
+        .then((articles) => {
+          if (cancelled) return
+          const mapped = articles.map((a) => ({
+            id: `live-${a.id}`,
+            headline: a.headline,
+            body: a.summary,
+            source: a.source,
+            tags: '',
+            published_at: a.publishedAt,
+            live: true,
+            externalUrl: a.url,
+          }))
+          mapped.forEach((item, i) => seedIfNeeded(item.id, i))
+          setLiveItems(mapped)
+        })
+        .catch(() => {}) // live news is a bonus, not critical — fail silently
+    }
+    fetchLive()
+    const interval = setInterval(fetchLive, 60000)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [seedIfNeeded])
+
+  const combinedNews = news ? [...liveItems, ...news] : null
+
   // Keep the fundamentals panel following whichever card is currently showing.
   useEffect(() => {
-    if (!news || news.length === 0) return
-    const current = news[Math.min(index, news.length - 1)]
+    if (!combinedNews || combinedNews.length === 0) return
+    const current = combinedNews[Math.min(index, combinedNews.length - 1)]
     setActiveTicker(findKnownTicker(current.tags))
-  }, [news, index, setActiveTicker])
+  }, [combinedNews, index, setActiveTicker])
 
   if (error) return <p className="text-body-md text-error">{error}</p>
-  if (news === null) return <p className="text-body-md text-on-surface-variant">Loading news…</p>
-  if (news.length === 0) return <p className="text-body-md text-on-surface-variant">No news items found.</p>
+  if (combinedNews === null) return <p className="text-body-md text-on-surface-variant">Loading news…</p>
+  if (combinedNews.length === 0) return <p className="text-body-md text-on-surface-variant">No news items found.</p>
 
-  const clampedIndex = Math.min(index, news.length - 1)
-  const item = news[clampedIndex]
+  const clampedIndex = Math.min(index, combinedNews.length - 1)
+  const item = combinedNews[clampedIndex]
   const tags = item.tags ? item.tags.split(',').filter(Boolean) : []
   const itemReactions = reactions[item.id] || []
 
@@ -73,7 +108,7 @@ export default function NewsReel() {
     setDragging(false)
     setDragX(dir === 'like' ? 700 : -700)
     setTimeout(() => {
-      setIndex((i) => Math.min(i + 1, news.length - 1))
+      setIndex((i) => Math.min(i + 1, combinedNews.length - 1))
       setDragX(0)
     }, 180)
   }
@@ -93,7 +128,7 @@ export default function NewsReel() {
   }
 
   function goNext() {
-    setIndex((i) => Math.min(i + 1, news.length - 1))
+    setIndex((i) => Math.min(i + 1, combinedNews.length - 1))
     setDragX(0)
   }
 
@@ -123,7 +158,7 @@ export default function NewsReel() {
       <div className="w-full flex items-center justify-between px-xs">
         <h2 className="text-headline-lg text-on-surface">Live Feed</h2>
         <div className="flex items-center gap-xs flex-wrap justify-end">
-          {news.map((n, i) => (
+          {combinedNews.map((n, i) => (
             <button
               key={n.id}
               onClick={() => goTo(i)}
@@ -167,7 +202,13 @@ export default function NewsReel() {
           </div>
 
           <div className="flex justify-between items-start gap-md">
-            <div className="flex gap-xs flex-wrap">
+            <div className="flex gap-xs flex-wrap items-center">
+              {item.live && (
+                <span className="text-label-caps text-tertiary uppercase tracking-wider bg-tertiary/10 px-2 py-1 border border-tertiary rounded flex items-center gap-1">
+                  <span className="w-[6px] h-[6px] rounded-full bg-tertiary animate-pulse" />
+                  Live
+                </span>
+              )}
               {tags.map((t) => (
                 <span
                   key={t}
@@ -180,7 +221,10 @@ export default function NewsReel() {
             <span className="text-label-caps text-on-surface-variant shrink-0">{timeAgo(item.published_at)}</span>
           </div>
 
-          <h3 className="text-headline-md text-on-surface cursor-pointer hover:text-primary transition-colors" onClick={() => navigate(`/news/${item.id}`)}>
+          <h3
+            className="text-headline-md text-on-surface cursor-pointer hover:text-primary transition-colors"
+            onClick={() => (item.live ? window.open(item.externalUrl, '_blank', 'noopener') : navigate(`/news/${item.id}`))}
+          >
             {item.headline}
           </h3>
           <p className="text-body-md text-on-surface-variant line-clamp-4">{item.body}</p>
@@ -189,7 +233,10 @@ export default function NewsReel() {
             <span className="text-label-caps text-on-surface-variant flex items-center gap-xs">
               <span className="material-symbols-outlined text-sm">apartment</span> {item.source}
             </span>
-            <button onClick={() => navigate(`/news/${item.id}`)} className="text-label-caps text-primary hover:text-primary-container transition-colors">
+            <button
+              onClick={() => (item.live ? window.open(item.externalUrl, '_blank', 'noopener') : navigate(`/news/${item.id}`))}
+              className="text-label-caps text-primary hover:text-primary-container transition-colors"
+            >
               READ MORE
             </button>
           </div>
@@ -230,7 +277,7 @@ export default function NewsReel() {
           </button>
           <button
             onClick={goNext}
-            disabled={clampedIndex === news.length - 1}
+            disabled={clampedIndex === combinedNews.length - 1}
             className="w-9 h-9 rounded-full bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface-variant hover:text-primary disabled:opacity-40 transition-colors"
           >
             <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
