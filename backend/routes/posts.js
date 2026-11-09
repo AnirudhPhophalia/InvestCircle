@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import db from '../db.js'
 import { requireAuth, optionalAuth } from '../auth.js'
+import { createNotification } from './notifications.js'
 
 const router = Router()
 
@@ -43,7 +44,21 @@ router.post('/', requireAuth, async (req, res) => {
     'INSERT INTO posts (user_id, title, body, tickers) VALUES ($1, $2, $3, $4) RETURNING id',
     [req.userId, title, body, tickerStr]
   )
-  res.status(201).json({ id: rows[0].id })
+  const postId = rows[0].id
+
+  // Create broadcast notification for new discussion
+  const { rows: authorRows } = await db.query('SELECT handle FROM users WHERE id = $1', [req.userId])
+  const authorHandle = authorRows[0]?.handle || 'A member'
+  createNotification({
+    userId: null, // broadcast to all
+    actorId: req.userId,
+    type: 'market_alert',
+    title: '💬 New Discussion Posted',
+    message: `@${authorHandle} started "${title.slice(0, 50)}${title.length > 50 ? '...' : ''}"`,
+    link: `/discussions/${postId}`,
+  })
+
+  res.status(201).json({ id: postId })
 })
 
 router.get('/:id', optionalAuth, async (req, res) => {
@@ -77,7 +92,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
 router.post('/:id/comments', requireAuth, async (req, res) => {
   const { body, parentId } = req.body
   if (!body) return res.status(400).json({ error: 'Comment body is required' })
-  const { rows: postRows } = await db.query('SELECT id FROM posts WHERE id = $1', [req.params.id])
+  const { rows: postRows } = await db.query('SELECT id, user_id, title FROM posts WHERE id = $1', [req.params.id])
   if (!postRows[0]) return res.status(404).json({ error: 'Post not found' })
   if (parentId) {
     const { rows: parentRows } = await db.query('SELECT id FROM comments WHERE id = $1 AND post_id = $2', [parentId, req.params.id])
@@ -87,6 +102,21 @@ router.post('/:id/comments', requireAuth, async (req, res) => {
     'INSERT INTO comments (post_id, user_id, parent_id, body) VALUES ($1, $2, $3, $4) RETURNING id',
     [req.params.id, req.userId, parentId || null, body]
   )
+
+  // Notify post owner if someone else commented on their post
+  if (postRows[0].user_id !== req.userId) {
+    const { rows: authorRows } = await db.query('SELECT handle FROM users WHERE id = $1', [req.userId])
+    const authorHandle = authorRows[0]?.handle || 'User'
+    createNotification({
+      userId: postRows[0].user_id,
+      actorId: req.userId,
+      type: 'comment',
+      title: '💬 New Reply on Your Post',
+      message: `@${authorHandle} commented on "${postRows[0].title.slice(0, 45)}${postRows[0].title.length > 45 ? '...' : ''}"`,
+      link: `/discussions/${postRows[0].id}`,
+    })
+  }
+
   res.status(201).json({ id: rows[0].id })
 })
 

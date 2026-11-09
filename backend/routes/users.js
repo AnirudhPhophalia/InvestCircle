@@ -3,6 +3,7 @@ import db from '../db.js'
 import { requireAuth, optionalAuth } from '../auth.js'
 import { toPublicUser } from '../helpers.js'
 import { evaluateAccuracyWithGemini } from '../accuracy.js'
+import { createNotification } from './notifications.js'
 
 const router = Router()
 
@@ -82,6 +83,17 @@ router.post('/:id/accuracy', optionalAuth, async (req, res) => {
       'UPDATE users SET accuracy = $1, accuracy_details = $2 WHERE id = $3',
       [result.accuracy, JSON.stringify(result), id]
     )
+
+    if (result.accuracy != null) {
+      createNotification({
+        userId: id,
+        actorId: null,
+        type: 'accuracy_call',
+        title: '🎯 Accuracy Score Calculated',
+        message: `Your discussion accuracy was evaluated at ${result.accuracy}% (${result.hits} Hits / ${result.misses} Misses).`,
+        link: '/profile',
+      })
+    }
 
     const { rows: countRows } = await db.query('SELECT COUNT(*) AS n FROM posts WHERE user_id = $1', [id])
 

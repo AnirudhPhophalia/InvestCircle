@@ -1,5 +1,5 @@
 -- InvestCircle database schema (PostgreSQL).
--- Tables added phase by phase per PHASES.md; currently covers Phase 1-5.
+-- Tables added phase by phase per PHASES.md; currently covers Phase 1-6.
 
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
@@ -73,4 +73,17 @@ CREATE TABLE IF NOT EXISTS watchlist_items (
   buy_date TEXT,
   quantity INTEGER NOT NULL DEFAULT 1,
   PRIMARY KEY (user_id, ticker)
+);
+
+-- Notifications table: user_id IS NULL represents global broadcast alerts.
+CREATE TABLE IF NOT EXISTS notifications (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),
+  actor_id INTEGER REFERENCES users(id),
+  type TEXT NOT NULL,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  link TEXT,
+  read BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

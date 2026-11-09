@@ -7,6 +7,7 @@ import postRoutes from './routes/posts.js'
 import newsRoutes from './routes/news.js'
 import userRoutes from './routes/users.js'
 import watchlistRoutes from './routes/watchlist.js'
+import notificationsRoutes from './routes/notifications.js'
 
 const app = express()
 // In production, frontend and API are served from the same Vercel domain, so
@@ -23,5 +24,6 @@ app.use('/api/posts', postRoutes)
 app.use('/api/news', newsRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/watchlist', watchlistRoutes)
+app.use('/api/notifications', notificationsRoutes)
 
 export default app

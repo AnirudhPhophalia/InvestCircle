@@ -131,6 +131,7 @@ const client = await db.connect()
 try {
   await client.query('BEGIN')
 
+  await client.query('DELETE FROM notifications')
   await client.query('DELETE FROM votes')
   await client.query('DELETE FROM comment_reactions')
   await client.query('DELETE FROM comments')
@@ -212,6 +213,53 @@ try {
     ])
   }
 
+  // Seed sample initial notifications
+  const demoNotifications = [
+    {
+      userId: null,
+      actorId: userIdByHandle.lakshay_sachdeva,
+      type: 'market_alert',
+      title: '🚨 Breaking: Federal Reserve Holds Rates',
+      message: 'FOMC signals inflation cooling toward target; rate cuts expected later this year.',
+      link: '/news/1',
+      read: false,
+    },
+    {
+      userId: null,
+      actorId: userIdByHandle.anirudh_phophalia,
+      type: 'market_alert',
+      title: '📈 NVDA Breakout Momentum',
+      message: 'Volume confirming above key resistance level with strong institutional interest.',
+      link: '/discussions/2',
+      read: false,
+    },
+    {
+      userId: userIdByHandle.anirudh_phophalia,
+      actorId: userIdByHandle.lakshay_sachdeva,
+      type: 'comment',
+      title: '💬 New Reply on Your Post',
+      message: '@lakshay_sachdeva commented on your NVDA breakout analysis.',
+      link: '/discussions/2',
+      read: false,
+    },
+    {
+      userId: userIdByHandle.lakshay_sachdeva,
+      actorId: userIdByHandle.anirudh_phophalia,
+      type: 'comment',
+      title: '💬 New Reply on Your Post',
+      message: '@anirudh_phophalia commented on your TCS Q3 Results analysis.',
+      link: '/discussions/1',
+      read: false,
+    },
+  ]
+
+  for (const n of demoNotifications) {
+    await client.query(
+      'INSERT INTO notifications (user_id, actor_id, type, title, message, link, read, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())',
+      [n.userId, n.actorId, n.type, n.title, n.message, n.link, n.read]
+    )
+  }
+
   await client.query('COMMIT')
 } catch (err) {
   await client.query('ROLLBACK')
@@ -220,6 +268,6 @@ try {
   client.release()
 }
 
-console.log(`Seeded ${users.length} users, ${posts.length} posts, ${news.length} news items.`)
+console.log(`Seeded ${users.length} users, ${posts.length} posts, ${news.length} news items, and initial notifications.`)
 console.log(`Log in as any of: ${users.map((u) => u.email).join(', ')} — password: ${PASSWORD}`)
 await db.end()
