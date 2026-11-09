@@ -2,6 +2,7 @@ import { Router } from 'express'
 import db from '../db.js'
 import { requireAuth, optionalAuth } from '../auth.js'
 import { toPublicUser } from '../helpers.js'
+import { evaluateAccuracyWithGemini } from '../accuracy.js'
 
 const router = Router()
 
@@ -24,15 +25,82 @@ router.get('/:id', async (req, res) => {
   const user = rows[0]
   if (!user) return res.status(404).json({ error: 'User not found' })
   const { rows: countRows } = await db.query('SELECT COUNT(*) AS n FROM posts WHERE user_id = $1', [req.params.id])
+  
+  let accuracyDetails = null
+  if (user.accuracy_details) {
+    try {
+      accuracyDetails = typeof user.accuracy_details === 'string' ? JSON.parse(user.accuracy_details) : user.accuracy_details
+    } catch {
+      accuracyDetails = null
+    }
+  }
+
   res.json({
     ...toPublicUser(user),
     stats: {
       posts: Number(countRows[0].n),
       followers: user.follower_count,
       following: user.following_count,
-      accuracy: null, // computed for real in Phase 5
+      accuracy: user.accuracy != null ? `${user.accuracy}%` : null,
+      accuracy_details: accuracyDetails,
     },
   })
+})
+
+router.post('/:id/accuracy', optionalAuth, async (req, res) => {
+  try {
+    const { id } = req.params
+    const { rows } = await db.query('SELECT * FROM users WHERE id = $1', [id])
+    const user = rows[0]
+    if (!user) return res.status(404).json({ error: 'User not found' })
+
+    const apiKey = (req.body?.apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '').trim()
+    if (!apiKey) {
+      return res.status(400).json({
+        error: 'Gemini API key is required to check accuracy with online data.',
+        apiKeyRequired: true,
+      })
+    }
+
+    const { rows: posts } = await db.query(
+      'SELECT id, title, body, tickers, created_at FROM posts WHERE user_id = $1 ORDER BY created_at DESC',
+      [id]
+    )
+
+    const { rows: comments } = await db.query(
+      `SELECT c.id, c.body, c.created_at, p.title AS post_title, p.tickers
+       FROM comments c
+       JOIN posts p ON p.id = c.post_id
+       WHERE c.user_id = $1 ORDER BY c.created_at DESC LIMIT 15`,
+      [id]
+    )
+
+    const result = await evaluateAccuracyWithGemini({ posts, comments, apiKey })
+
+    // Store in database
+    await db.query(
+      'UPDATE users SET accuracy = $1, accuracy_details = $2 WHERE id = $3',
+      [result.accuracy, JSON.stringify(result), id]
+    )
+
+    const { rows: countRows } = await db.query('SELECT COUNT(*) AS n FROM posts WHERE user_id = $1', [id])
+
+    res.json({
+      success: true,
+      accuracy: result.accuracy != null ? `${result.accuracy}%` : null,
+      stats: {
+        posts: Number(countRows[0].n),
+        followers: user.follower_count,
+        following: user.following_count,
+        accuracy: result.accuracy != null ? `${result.accuracy}%` : null,
+        accuracy_details: result,
+      },
+      details: result,
+    })
+  } catch (err) {
+    console.error('Accuracy calculation error:', err)
+    res.status(err.status || 500).json({ error: err.message || 'Failed to calculate accuracy' })
+  }
 })
 
 router.get('/:id/posts', optionalAuth, async (req, res) => {

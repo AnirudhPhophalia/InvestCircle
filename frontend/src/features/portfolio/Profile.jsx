@@ -141,6 +141,15 @@ export default function Profile() {
   const [bioDraft, setBioDraft] = useState('')
   const [error, setError] = useState('')
 
+  // Accuracy calculation state
+  const [loadingAccuracy, setLoadingAccuracy] = useState(false)
+  const [accuracyError, setAccuracyError] = useState('')
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false)
+  const [showBreakdownModal, setShowBreakdownModal] = useState(false)
+  const [apiKeyInput, setApiKeyInput] = useState(() => localStorage.getItem('investcircle_gemini_api_key') || '')
+  const [showKeyText, setShowKeyText] = useState(false)
+  const [saveKeyLocally, setSaveKeyLocally] = useState(true)
+
   useEffect(() => {
     if (user) api.get(`/users/${user.id}`).then((u) => setStats(u.stats))
   }, [user])
@@ -184,6 +193,43 @@ export default function Profile() {
   async function removeHolding(ticker) {
     await api.del(`/watchlist/${ticker}`)
     setWatchlist((prev) => prev.filter((h) => h.ticker !== ticker))
+  }
+
+  async function handleGetAccuracy(customKey) {
+    const keyToUse =
+      (typeof customKey === 'string' ? customKey : apiKeyInput).trim() ||
+      localStorage.getItem('investcircle_gemini_api_key') ||
+      ''
+
+    setLoadingAccuracy(true)
+    setAccuracyError('')
+
+    try {
+      const res = await api.post(`/users/${user.id}/accuracy`, keyToUse ? { apiKey: keyToUse } : {})
+      if (res?.stats) {
+        setStats(res.stats)
+      }
+      if (keyToUse && saveKeyLocally) {
+        localStorage.setItem('investcircle_gemini_api_key', keyToUse)
+      }
+      setShowApiKeyModal(false)
+      setShowBreakdownModal(true)
+    } catch (err) {
+      const msg = err.message || ''
+      if (msg.includes('API key') || msg.includes('apiKeyRequired')) {
+        setShowApiKeyModal(true)
+      } else {
+        setAccuracyError(msg || 'Failed to calculate accuracy')
+      }
+    } finally {
+      setLoadingAccuracy(false)
+    }
+  }
+
+  function handleKeySubmit(e) {
+    e.preventDefault()
+    if (!apiKeyInput.trim()) return
+    handleGetAccuracy(apiKeyInput.trim())
   }
 
   if (!user) return null
@@ -240,8 +286,69 @@ export default function Profile() {
             <p className="text-body-md text-on-surface max-w-2xl leading-relaxed">{user.bio || 'No bio yet.'}</p>
           )}
 
-          <div className="flex flex-wrap gap-lg md:gap-xl pt-sm border-t border-surface-variant mt-sm">
-            <Stat label="Accuracy %" value={stats?.accuracy ?? '—'} />
+          <div className="flex flex-wrap items-center gap-lg md:gap-xl pt-sm border-t border-surface-variant mt-sm">
+            {/* Accuracy block */}
+            <div className="flex flex-col gap-xs">
+              <span className="text-label-caps text-outline uppercase tracking-wider">Accuracy %</span>
+              {stats?.accuracy ? (
+                <div className="flex items-center gap-xs">
+                  <span className="text-data-mono font-bold text-headline-sm text-secondary">
+                    {stats.accuracy}
+                  </span>
+                  {stats.accuracy_details && (
+                    <button
+                      onClick={() => setShowBreakdownModal(true)}
+                      className="text-body-xs text-primary hover:underline ml-1 inline-flex items-center gap-0.5"
+                      title="View hit/miss breakdown"
+                    >
+                      <span className="material-symbols-outlined text-[15px]">insights</span>
+                      <span className="text-xs">Breakdown</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleGetAccuracy()}
+                    disabled={loadingAccuracy}
+                    className="text-on-surface-variant hover:text-primary transition-colors ml-1 p-0.5 rounded"
+                    title="Recalculate Accuracy"
+                  >
+                    <span className={`material-symbols-outlined text-[16px] ${loadingAccuracy ? 'animate-spin' : ''}`}>
+                      refresh
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setShowApiKeyModal(true)}
+                    className="text-outline hover:text-on-surface transition-colors p-0.5 rounded"
+                    title="Change Gemini API Key"
+                  >
+                    <span className="material-symbols-outlined text-[15px]">key</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-1 items-start">
+                  <button
+                    onClick={() => handleGetAccuracy()}
+                    disabled={loadingAccuracy}
+                    className="inline-flex items-center gap-xs px-sm py-1 bg-primary text-on-primary text-label-caps rounded hover:bg-opacity-90 transition-all font-semibold shadow-sm text-xs"
+                  >
+                    {loadingAccuracy ? (
+                      <>
+                        <span className="material-symbols-outlined text-[14px] animate-spin">progress_activity</span>
+                        <span>Checking online...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="material-symbols-outlined text-[15px]">analytics</span>
+                        <span>Get Accuracy</span>
+                      </>
+                    )}
+                  </button>
+                  {accuracyError && (
+                    <span className="text-body-xs text-error max-w-[200px] leading-tight">{accuracyError}</span>
+                  )}
+                </div>
+              )}
+            </div>
+
             <Stat label="Discussions" value={stats?.posts ?? '—'} />
             <Stat label="Followers" value={stats?.followers ?? '—'} />
             <Stat label="Following" value={stats?.following ?? '—'} />
@@ -370,6 +477,291 @@ export default function Profile() {
               ADD HOLDING
             </button>
           </form>
+        </div>
+      )}
+
+      {/* Accuracy Breakdown Modal */}
+      {showBreakdownModal && stats?.accuracy_details && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-md bg-black/70 backdrop-blur-sm animate-fade-in">
+          <div className="bg-surface border border-outline-variant rounded-lg max-w-2xl w-full max-h-[88vh] flex flex-col overflow-hidden shadow-2xl">
+            {/* Modal Header */}
+            <div className="p-md border-b border-outline-variant flex items-center justify-between bg-surface-container-low">
+              <div className="flex items-center gap-sm">
+                <span className="material-symbols-outlined text-primary text-2xl">verified</span>
+                <div>
+                  <h2 className="text-headline-sm text-on-surface font-bold">Accuracy & Hit-Rate Breakdown</h2>
+                  <p className="text-body-xs text-on-surface-variant">
+                    Verified with Gemini against online market data & discussions sentiment
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowBreakdownModal(false)}
+                className="text-on-surface-variant hover:text-on-surface p-1 rounded hover:bg-surface-container"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-md overflow-y-auto flex flex-col gap-md">
+              {/* Score Summary Box */}
+              <div className="bg-surface-container-lowest border border-outline-variant rounded-lg p-md flex flex-col sm:flex-row items-center justify-between gap-md">
+                <div>
+                  <span className="text-label-caps text-outline uppercase tracking-wider text-xs">Total Accuracy Score</span>
+                  <div className="text-display font-bold text-secondary mt-0.5">{stats.accuracy}</div>
+                  <p className="text-body-xs text-on-surface-variant mt-1">
+                    Formula: <span className="text-on-surface font-mono font-medium">Hits ÷ (Hits + Misses) × 100</span>
+                  </p>
+                  {stats.accuracy_details.formula && (
+                    <p className="text-body-xs text-primary font-mono font-medium mt-0.5">
+                      {stats.accuracy_details.formula}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex gap-sm">
+                  <div className="flex flex-col items-center bg-surface border border-outline-variant px-md py-sm rounded min-w-[70px]">
+                    <span className="text-label-caps text-secondary uppercase text-xs flex items-center gap-1 font-bold">
+                      <span className="material-symbols-outlined text-[14px]">check_circle</span> Hits
+                    </span>
+                    <span className="text-data-mono font-bold text-headline-sm text-secondary">
+                      {stats.accuracy_details.hits ?? 0}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center bg-surface border border-outline-variant px-md py-sm rounded min-w-[70px]">
+                    <span className="text-label-caps text-error uppercase text-xs flex items-center gap-1 font-bold">
+                      <span className="material-symbols-outlined text-[14px]">cancel</span> Misses
+                    </span>
+                    <span className="text-data-mono font-bold text-headline-sm text-error">
+                      {stats.accuracy_details.misses ?? 0}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center bg-surface border border-outline-variant px-md py-sm rounded min-w-[70px]">
+                    <span className="text-label-caps text-outline uppercase text-xs font-bold">Neutral</span>
+                    <span className="text-data-mono font-bold text-headline-sm text-on-surface-variant">
+                      {stats.accuracy_details.neutral ?? 0}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Evaluated Discussions List */}
+              <div className="flex flex-col gap-xs">
+                <span className="text-label-caps text-outline uppercase tracking-wider text-xs">
+                  Evaluated Discussions & Calls ({stats.accuracy_details.evaluations?.length ?? 0})
+                </span>
+
+                {(!stats.accuracy_details.evaluations || stats.accuracy_details.evaluations.length === 0) && (
+                  <p className="text-body-sm text-on-surface-variant py-md text-center">
+                    No discussions found to evaluate.
+                  </p>
+                )}
+
+                <div className="flex flex-col gap-sm">
+                  {stats.accuracy_details.evaluations?.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-surface-container-lowest border border-outline-variant rounded p-sm flex flex-col gap-xs"
+                    >
+                      <div className="flex items-start justify-between gap-sm flex-wrap">
+                        <div className="flex items-center gap-xs flex-wrap">
+                          {item.ticker && item.ticker !== 'N/A' && (
+                            <span className="bg-surface border border-outline-variant text-data-mono text-on-surface text-xs font-bold px-1.5 py-0.5 rounded">
+                              ${item.ticker}
+                            </span>
+                          )}
+                          <span
+                            className={`text-label-caps text-xs px-2 py-0.5 rounded uppercase font-semibold ${
+                              item.sentiment?.toLowerCase() === 'bullish'
+                                ? 'bg-secondary/15 text-secondary border border-secondary/30'
+                                : item.sentiment?.toLowerCase() === 'bearish'
+                                ? 'bg-tertiary/15 text-tertiary border border-tertiary/30'
+                                : 'bg-surface-variant text-on-surface-variant border border-outline-variant'
+                            }`}
+                          >
+                            {item.sentiment || 'Discussion'}
+                          </span>
+                          <span className="text-body-sm font-semibold text-on-surface">
+                            {item.title}
+                          </span>
+                        </div>
+
+                        <span
+                          className={`text-label-caps text-xs px-2 py-0.5 rounded font-bold uppercase ${
+                            item.verdict?.toUpperCase() === 'HIT'
+                              ? 'bg-secondary text-on-primary'
+                              : item.verdict?.toUpperCase() === 'MISS'
+                              ? 'bg-error text-on-error'
+                              : 'bg-surface-container-high text-on-surface-variant'
+                          }`}
+                        >
+                          {item.verdict?.toUpperCase() === 'HIT'
+                            ? '✓ HIT'
+                            : item.verdict?.toUpperCase() === 'MISS'
+                            ? '✗ MISS'
+                            : 'NEUTRAL'}
+                        </span>
+                      </div>
+
+                      {item.claim && (
+                        <div className="text-body-xs text-on-surface-variant">
+                          <span className="text-on-surface font-semibold">User Stance:</span> {item.claim}
+                        </div>
+                      )}
+
+                      {item.online_truth && (
+                        <div className="text-body-xs text-on-surface-variant">
+                          <span className="text-primary font-semibold">Online Market Data:</span> {item.online_truth}
+                        </div>
+                      )}
+
+                      {item.reason && (
+                        <p className="text-body-xs text-on-surface bg-surface/60 p-2 rounded border border-outline-variant/60 leading-relaxed">
+                          {item.reason}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-md border-t border-outline-variant bg-surface-container-low flex justify-between items-center">
+              <button
+                onClick={() => {
+                  setShowBreakdownModal(false)
+                  setShowApiKeyModal(true)
+                }}
+                className="text-body-xs text-outline hover:text-on-surface flex items-center gap-1"
+              >
+                <span className="material-symbols-outlined text-[15px]">key</span>
+                <span>Configure API Key</span>
+              </button>
+
+              <div className="flex gap-sm">
+                <button
+                  onClick={() => handleGetAccuracy()}
+                  disabled={loadingAccuracy}
+                  className="px-md py-xs bg-surface border border-outline-variant hover:border-primary text-on-surface text-label-caps rounded transition-colors flex items-center gap-1 text-xs"
+                >
+                  <span className={`material-symbols-outlined text-[15px] ${loadingAccuracy ? 'animate-spin' : ''}`}>
+                    refresh
+                  </span>
+                  <span>Recalculate</span>
+                </button>
+                <button
+                  onClick={() => setShowBreakdownModal(false)}
+                  className="px-md py-xs bg-primary text-on-primary text-label-caps rounded hover:bg-opacity-90 transition-all text-xs"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Gemini API Key Modal */}
+      {showApiKeyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-md bg-black/70 backdrop-blur-sm animate-fade-in">
+          <div className="bg-surface border border-outline-variant rounded-lg max-w-md w-full overflow-hidden shadow-2xl">
+            <div className="p-md border-b border-outline-variant flex items-center justify-between bg-surface-container-low">
+              <div className="flex items-center gap-sm">
+                <span className="material-symbols-outlined text-primary text-2xl">key</span>
+                <h2 className="text-headline-sm text-on-surface font-bold">Gemini API Key</h2>
+              </div>
+              <button
+                onClick={() => setShowApiKeyModal(false)}
+                className="text-on-surface-variant hover:text-on-surface p-1 rounded"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleKeySubmit} className="p-md flex flex-col gap-md">
+              <p className="text-body-sm text-on-surface-variant leading-relaxed">
+                InvestCircle uses the Google Gemini API with Google Search grounding to fetch online stock data and verify the trueness of your discussion calls.
+              </p>
+
+              <div className="flex flex-col gap-xs">
+                <label className="text-label-caps text-on-surface-variant uppercase text-xs">
+                  Gemini API Key
+                </label>
+                <div className="relative">
+                  <input
+                    type={showKeyText ? 'text' : 'password'}
+                    required
+                    placeholder="AIzaSy..."
+                    value={apiKeyInput}
+                    onChange={(e) => setApiKeyInput(e.target.value)}
+                    className="w-full px-sm py-2 bg-surface-container-lowest border border-outline-variant rounded text-data-mono text-on-surface text-sm focus:border-primary outline-none pr-9"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowKeyText((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      {showKeyText ? 'visibility_off' : 'visibility'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-xs">
+                <input
+                  type="checkbox"
+                  id="saveKey"
+                  checked={saveKeyLocally}
+                  onChange={(e) => setSaveKeyLocally(e.target.checked)}
+                  className="rounded border-outline-variant bg-surface text-primary focus:ring-0"
+                />
+                <label htmlFor="saveKey" className="text-body-xs text-on-surface-variant cursor-pointer">
+                  Remember in this browser (localStorage)
+                </label>
+              </div>
+
+              <div className="text-body-xs text-on-surface-variant bg-surface-container-lowest p-sm rounded border border-outline-variant">
+                Need a free key? Get one in seconds at{' '}
+                <a
+                  href="https://aistudio.google.com/app/apikey"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary underline hover:text-opacity-80 inline-flex items-center gap-0.5"
+                >
+                  Google AI Studio <span className="material-symbols-outlined text-[13px]">open_in_new</span>
+                </a>
+              </div>
+
+              {accuracyError && (
+                <div className="p-xs bg-error/10 border border-error/30 rounded text-error text-body-xs">
+                  {accuracyError}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-sm pt-xs">
+                <button
+                  type="button"
+                  onClick={() => setShowApiKeyModal(false)}
+                  className="px-md py-xs border border-outline-variant text-on-surface-variant text-label-caps rounded hover:bg-surface-container transition-colors text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loadingAccuracy || !apiKeyInput.trim()}
+                  className="px-md py-xs bg-primary text-on-primary text-label-caps rounded hover:bg-opacity-90 transition-all disabled:opacity-50 flex items-center gap-1 text-xs"
+                >
+                  {loadingAccuracy && (
+                    <span className="material-symbols-outlined text-[14px] animate-spin">progress_activity</span>
+                  )}
+                  <span>Verify & Calculate</span>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

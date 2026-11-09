@@ -3,6 +3,12 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
+// Load .env automatically if available in Node 20.6+
+if (process.loadEnvFile) {
+  try { process.loadEnvFile() } catch {}
+  try { process.loadEnvFile(new URL('./.env', import.meta.url)) } catch {}
+}
+
 // Postgres returns bigint (COUNT/SUM results) as strings by default, to avoid
 // precision loss beyond Number.MAX_SAFE_INTEGER. This app's counts never get
 // remotely that large, so parse them as plain numbers -- otherwise frontend

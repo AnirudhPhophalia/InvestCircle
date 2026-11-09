@@ -1,5 +1,5 @@
 -- InvestCircle database schema (PostgreSQL).
--- Tables added phase by phase per PHASES.md; currently covers Phase 1-4.
+-- Tables added phase by phase per PHASES.md; currently covers Phase 1-5.
 
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
@@ -12,8 +12,13 @@ CREATE TABLE IF NOT EXISTS users (
   badge TEXT NOT NULL DEFAULT '',
   follower_count INTEGER NOT NULL DEFAULT 0,
   following_count INTEGER NOT NULL DEFAULT 0,
+  accuracy INTEGER,
+  accuracy_details JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS accuracy INTEGER;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS accuracy_details JSONB;
 
 CREATE TABLE IF NOT EXISTS posts (
   id SERIAL PRIMARY KEY,
