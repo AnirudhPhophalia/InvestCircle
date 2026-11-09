@@ -1,7 +1,7 @@
 // In production the API is served from the same Vercel domain as the frontend
-// (see /api and vercel.json), so a relative path is correct there. In dev,
-// Vite (5173) and Express (4000) are separate origins. Can be overridden via VITE_API_URL.
-const BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:4000/api' : '/api')
+// (see /api and vercel.json), so a relative path is always used in production.
+// In dev, Vite (5173) and Express (4000) are separate origins.
+const BASE = import.meta.env.DEV ? (import.meta.env.VITE_API_URL || 'http://localhost:4000/api') : '/api'
 
 async function request(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, {

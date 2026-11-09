@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 // set a real JWT_SECRET env var for the deployed instance.
 const JWT_SECRET = process.env.JWT_SECRET || 'investcircle-dev-secret'
 const COOKIE_NAME = 'ic_session'
+const isProd = process.env.NODE_ENV === 'production'
 
 export function signToken(userId) {
   return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' })
@@ -13,13 +14,17 @@ export function setSessionCookie(res, userId) {
   res.cookie(COOKIE_NAME, signToken(userId), {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: isProd,
     maxAge: 7 * 24 * 60 * 60 * 1000,
   })
 }
 
 export function clearSessionCookie(res) {
-  res.clearCookie(COOKIE_NAME)
+  res.clearCookie(COOKIE_NAME, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: isProd,
+  })
 }
 
 export function requireAuth(req, res, next) {

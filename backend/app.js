@@ -10,11 +10,31 @@ import watchlistRoutes from './routes/watchlist.js'
 import notificationsRoutes from './routes/notifications.js'
 
 const app = express()
-// In production, frontend and API are served from the same Vercel domain, so
-// the browser never sends a cross-origin request and CORS doesn't apply. This
-// origin only matters for local dev, where Vite (5173) and Express (4000)
-// are separate origins.
-app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:5173', credentials: true }))
+
+// Trust reverse proxies (Vercel serverless / Neon)
+app.set('trust proxy', 1)
+
+// In production on Vercel, frontend and API are served from the same domain
+// (/api/* rewrites to api/index.js), so requests are same-origin.
+// For local dev, Vite (5173) and Express (4000) are separate origins.
+const rawOrigins = process.env.CORS_ORIGIN || 'http://localhost:5173,https://invest-circle.vercel.app'
+const allowedOrigins = rawOrigins
+  .split(',')
+  .map((o) => o.trim().replace(/\/+$/, ''))
+  .filter(Boolean)
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (curl, server-to-server)
+      if (!origin) return callback(null, true)
+      const cleanOrigin = origin.trim().replace(/\/+$/, '')
+      callback(null, cleanOrigin)
+    },
+    credentials: true,
+  })
+)
+
 app.use(express.json())
 app.use(cookieParser())
 

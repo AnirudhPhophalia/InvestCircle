@@ -1,6 +1,6 @@
-# Week 6 : Live Notifications, Cross-Origin Auth & Demo Readiness
+# Week 6 : Live Notifications, Monorepo Deployment & Demo Readiness
 
-Wrapped up Phase 6 and final demo preparations, focusing on the interactive live notification system, resolving cross-site production deployment bugs, and polishing the platform.
+Wrapped up Phase 6 and final demo preparations, focusing on the interactive live notification system, single-domain Vercel deployment architecture, and platform polish.
 
 ### 1. Live Notification System
 Built out the full notification infrastructure to make the app feel alive during discussions:
@@ -12,10 +12,11 @@ Built out the full notification infrastructure to make the app feel alive during
 - Updated the header bell menu in `Layout.jsx` with an active unread count badge, filter tabs (All / Unread), and visual category chips (Market Alert, Signal, Accuracy Call).
 - Added an inline "Broadcast Alert" composer allowing users to post real-time alerts directly, plus a one-click simulation trigger for presentation demonstrations. Added floating toast banners for new alerts arriving while browsing.
 
-### 2. Cross-Origin Auth & CORS Resolution
-Ran into a critical deployment issue where the Vercel frontend (`https://invest-circle.vercel.app`) was blocked from communicating with the Render backend (`https://investcircle.onrender.com`):
-- Diagnosed the CORS failure: the backend `Access-Control-Allow-Origin` had an extra trailing slash (`https://invest-circle.vercel.app/`), which browsers reject because origins must match character-for-character without trailing slashes. Sanitized origin normalization in `backend/app.js`.
-- Fixed cross-site session cookies in `backend/auth.js`: because frontend and backend live on separate domains, browsers dropped cookies with `SameSite=Lax`. Switched production cookies to `SameSite=None; Secure`, and enabled `app.set('trust proxy', 1)` so Express respects HTTPS headers behind Render's reverse proxy.
+### 2. Vercel Single-Domain Deployment & Architecture
+InvestCircle is architected as a full monorepo hosted entirely on Vercel with Neon PostgreSQL:
+- Frontend (React + Vite) is served as a static build from `frontend/dist`.
+- Backend (Express) runs as a unified Vercel serverless function entrypoint (`api/index.js`), with all requests under `/api/*` routed directly to it via `vercel.json` rewrites.
+- Ensured `frontend/src/shared/lib/api.js` strictly routes requests to the relative `/api` path in production. This guarantees same-origin communication, completely eliminating cross-origin CORS overhead and enabling secure, native first-party session cookies (`SameSite=Lax`) on `invest-circle.vercel.app`.
 
 ### 3. Environment Templates & Codebase Audit
 Created comprehensive `.env.example` templates across root, `backend/`, and `frontend/` documenting all ports, database URLs, JWT secrets, and API keys. Ran an audit through `oxlint` and Vite builds to ensure zero compile warnings or runtime errors before presentation day.
