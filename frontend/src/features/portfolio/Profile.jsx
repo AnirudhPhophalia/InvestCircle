@@ -146,7 +146,7 @@ export default function Profile() {
   const [accuracyError, setAccuracyError] = useState('')
   const [showApiKeyModal, setShowApiKeyModal] = useState(false)
   const [showBreakdownModal, setShowBreakdownModal] = useState(false)
-  const [apiKeyInput, setApiKeyInput] = useState(() => localStorage.getItem('investcircle_gemini_api_key') || '')
+  const [apiKeyInput, setApiKeyInput] = useState(() => localStorage.getItem('investcircle_gemini_api_key') || import.meta.env.VITE_GEMINI_API_KEY || '')
   const [showKeyText, setShowKeyText] = useState(false)
   const [saveKeyLocally, setSaveKeyLocally] = useState(true)
 
@@ -199,6 +199,7 @@ export default function Profile() {
     const keyToUse =
       (typeof customKey === 'string' ? customKey : apiKeyInput).trim() ||
       localStorage.getItem('investcircle_gemini_api_key') ||
+      import.meta.env.VITE_GEMINI_API_KEY ||
       ''
 
     setLoadingAccuracy(true)
