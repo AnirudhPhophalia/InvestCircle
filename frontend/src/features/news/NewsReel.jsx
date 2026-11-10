@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../../shared/lib/api.js'
 import { timeAgo } from '../../shared/lib/time.js'
@@ -12,12 +12,13 @@ import VoiceReactorList from './VoiceReactorList.jsx'
 
 export default function NewsReel() {
   const navigate = useNavigate()
-  const { setActiveTicker } = useActiveTicker()
+  const { setActiveTicker, addAiCompany } = useActiveTicker()
   const { byNewsId: reactions, seedIfNeeded, addReaction } = useVoiceReactions()
   const [params] = useSearchParams()
   const q = params.get('q') || ''
   const [news, setNews] = useState(null)
   const [liveItems, setLiveItems] = useState([])
+  const [liveLoaded, setLiveLoaded] = useState(false)
   const [error, setError] = useState('')
   const [index, setIndex] = useState(0)
   const [dragX, setDragX] = useState(0)
@@ -25,6 +26,38 @@ export default function NewsReel() {
   const [startX, setStartX] = useState(0)
   const [recording, setRecording] = useState(false)
   const [storyIndex, setStoryIndex] = useState(null)
+  // Per live card: the company an LLM judged most affected by that news.
+  const [matches, setMatches] = useState({})
+  const requestedMatches = useRef(new Set())
+
+  const requestMatch = useCallback(
+    (item) => {
+      if (requestedMatches.current.has(item.id)) return
+      requestedMatches.current.add(item.id)
+      setMatches((m) => ({ ...m, [item.id]: { status: 'loading' } }))
+      api
+        .get(`/news/live/${item.liveId}/company`)
+        .then((r) => {
+          if (r.data) addAiCompany(r.ticker, { ...r.data, aiReason: r.reason })
+          setMatches((m) => ({
+            ...m,
+            [item.id]: {
+              status: 'done',
+              ticker: r.ticker,
+              name: r.name,
+              reason: r.reason,
+              hasData: Boolean(r.data),
+              secondary: r.secondary || [],
+            },
+          }))
+        })
+        .catch(() => {
+          requestedMatches.current.delete(item.id) // allow a retry on the next live refresh
+          setMatches((m) => ({ ...m, [item.id]: { status: 'error' } }))
+        })
+    },
+    [addAiCompany]
+  )
 
   useEffect(() => {
     setNews(null)
@@ -51,6 +84,7 @@ export default function NewsReel() {
           if (cancelled) return
           const mapped = articles.map((a) => ({
             id: `live-${a.id}`,
+            liveId: a.id,
             headline: a.headline,
             body: a.summary,
             source: a.source,
@@ -61,8 +95,11 @@ export default function NewsReel() {
           }))
           mapped.forEach((item, i) => seedIfNeeded(item.id, i))
           setLiveItems(mapped)
+          // Match every live card up front so swiping to one is instant.
+          mapped.forEach(requestMatch)
         })
         .catch(() => {}) // live news is a bonus, not critical — fail silently
+        .finally(() => !cancelled && setLiveLoaded(true))
     }
     fetchLive()
     const interval = setInterval(fetchLive, 60000)
@@ -70,19 +107,31 @@ export default function NewsReel() {
       cancelled = true
       clearInterval(interval)
     }
-  }, [seedIfNeeded])
+  }, [seedIfNeeded, requestMatch])
 
-  const combinedNews = news ? [...liveItems, ...news] : null
+  // Wait for the live batch too, so the reel doesn't open on a demo card and
+  // then jump when live cards land in front of it.
+  const combinedNews = news && liveLoaded ? [...liveItems, ...news] : null
+  const currentItem = combinedNews?.[Math.min(index, combinedNews.length - 1)]
+  const currentMatch = currentItem?.live ? matches[currentItem.id] : null
 
-  // Keep the fundamentals panel following whichever card is currently showing.
+  // Keep the fundamentals panel following whichever card is currently showing:
+  // seeded cards by their tags, live cards by their AI-matched company.
   useEffect(() => {
-    if (!combinedNews || combinedNews.length === 0) return
-    const current = combinedNews[Math.min(index, combinedNews.length - 1)]
-    setActiveTicker(findKnownTicker(current.tags))
-  }, [combinedNews, index, setActiveTicker])
+    if (!currentItem) return
+    if (!currentItem.live) setActiveTicker(findKnownTicker(currentItem.tags))
+    else setActiveTicker(currentMatch?.status === 'done' ? currentMatch.ticker : null)
+  }, [currentItem, currentMatch, setActiveTicker])
 
   if (error) return <p className="text-body-md text-error">{error}</p>
-  if (combinedNews === null) return <p className="text-body-md text-on-surface-variant">Loading news…</p>
+  if (combinedNews === null) {
+    return (
+      <p className="w-full max-w-md mx-auto pt-xl text-body-md text-on-surface-variant flex items-center justify-center gap-xs animate-pulse">
+        <span className="material-symbols-outlined text-[18px] text-primary">auto_awesome</span>
+        Fetching live news and finding the most related company…
+      </p>
+    )
+  }
   if (combinedNews.length === 0) return <p className="text-body-md text-on-surface-variant">No news items found.</p>
 
   const clampedIndex = Math.min(index, combinedNews.length - 1)
@@ -229,6 +278,25 @@ export default function NewsReel() {
           </h3>
           <p className="text-body-md text-on-surface-variant line-clamp-4">{item.body}</p>
 
+          {item.live && currentMatch?.status === 'loading' && (
+            <p className="text-body-sm text-on-surface-variant flex items-center gap-xs">
+              <span className="material-symbols-outlined text-[16px] text-primary animate-pulse">auto_awesome</span>
+              Finding the company most affected…
+            </p>
+          )}
+          {item.live && currentMatch?.status === 'done' && (
+            <div className="bg-surface-container-low border border-outline-variant rounded p-sm flex flex-col gap-[2px]">
+              <span className="text-label-caps text-on-surface-variant uppercase tracking-wider flex items-center gap-xs">
+                <span className="material-symbols-outlined text-[14px] text-primary">auto_awesome</span>
+                Most affected (AI)
+              </span>
+              <span className="text-body-md text-on-surface">
+                {currentMatch.name} <span className="text-data-mono text-primary">{currentMatch.ticker}</span>
+              </span>
+              <span className="text-body-sm text-on-surface-variant line-clamp-3">{currentMatch.reason}</span>
+            </div>
+          )}
+
           <div className="flex items-center justify-between pt-sm border-t border-outline-variant">
             <span className="text-label-caps text-on-surface-variant flex items-center gap-xs">
               <span className="material-symbols-outlined text-sm">apartment</span> {item.source}
@@ -285,7 +353,21 @@ export default function NewsReel() {
         </div>
       </div>
 
-      <CompanyFundamentals />
+      {item.live && currentMatch?.status !== 'done' ? (
+        <CompanyFundamentals finding={currentMatch?.status === 'error' ? 'failed' : 'searching'} />
+      ) : item.live ? (
+        <CompanyFundamentals
+          key={item.id}
+          initialTicker={currentMatch.ticker}
+          affected={{
+            articleId: item.liveId,
+            companies: [{ ticker: currentMatch.ticker, name: currentMatch.name, primary: true }, ...currentMatch.secondary],
+          }}
+        />
+      ) : (
+        // Demo cards: only show fundamentals when the card names a known company.
+        findKnownTicker(item.tags) && <CompanyFundamentals key={item.id} initialTicker={findKnownTicker(item.tags)} />
+      )}
 
       {recording && <CameraRecorder onClose={() => setRecording(false)} onPost={handleRecordedClip} />}
 

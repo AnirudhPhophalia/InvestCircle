@@ -10,7 +10,9 @@ export default function PostCard({ post, onVoteChange }) {
       <VoteButtons post={post} onChange={(result) => onVoteChange(post.id, result)} />
       <div className="p-md flex-1 flex flex-col gap-sm min-w-0">
         <div className="flex items-center gap-xs text-body-sm text-outline flex-wrap">
-          <span className="font-bold text-on-surface">u/{post.handle}</span>
+          <Link to={`/users/${post.user_id}`} className="font-bold text-on-surface hover:text-primary hover:underline">
+            u/{post.handle}
+          </Link>
           {post.badge && (
             <span className="px-xs py-[2px] bg-secondary/10 text-secondary border border-secondary/20 rounded text-[10px] leading-none uppercase tracking-wider">
               {post.badge}

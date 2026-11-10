@@ -1,5 +1,9 @@
 node_modules/
+
+# secrets: API keys live in .env files, never in code
 .env
+.env.*
+!.env.example
 
 # build output
 frontend/dist/

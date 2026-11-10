@@ -81,6 +81,10 @@ export default {
           from: { opacity: '0', transform: 'translateY(16px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
         },
+        'slide-in-left': {
+          from: { opacity: '0', transform: 'translateX(-40px)' },
+          to: { opacity: '1', transform: 'translateX(0)' },
+        },
         blink: {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0' },
@@ -90,6 +94,7 @@ export default {
         bob: 'bob 1.4s ease-in-out infinite',
         'fade-up': 'fade-up 0.6s ease-out forwards',
         blink: 'blink 1s step-end infinite',
+        'slide-in-left': 'slide-in-left 0.5s ease-out backwards',
       },
     },
   },

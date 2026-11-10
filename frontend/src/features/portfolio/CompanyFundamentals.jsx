@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { api } from '../../shared/lib/api.js'
 import { FUNDAMENTALS, TICKERS } from '../../shared/lib/fundamentals.js'
 import { useActiveTicker } from '../../shared/context/TickerContext.jsx'
 
@@ -8,6 +9,27 @@ function Metric({ label, value }) {
       <span className="text-label-caps text-outline uppercase tracking-wider">{label}</span>
       <span className="text-data-mono text-on-surface">{value ?? '—'}</span>
     </div>
+  )
+}
+
+// Live (Finnhub) data has gaps the demo data doesn't — show "—", not "$ null".
+function fmt(value, prefix = '', suffix = '') {
+  return value === null || value === undefined || value === '—' ? '—' : `${prefix}${value}${suffix}`
+}
+
+function TickerSelect({ value, options, onChange }) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="h-8 px-sm border border-outline-variant rounded bg-surface-container-lowest text-data-mono text-on-surface focus:border-primary outline-none"
+    >
+      {options.map((o) => (
+        <option key={o.value} value={o.value}>
+          {o.label}
+        </option>
+      ))}
+    </select>
   )
 }
 
@@ -54,10 +76,14 @@ function exportToCsv(ticker, data) {
   URL.revokeObjectURL(url)
 }
 
-export default function CompanyFundamentals() {
-  const { activeTicker } = useActiveTicker()
-  const [ticker, setTicker] = useState(activeTicker || 'TCS')
+// `affected` (live news only): { articleId, companies: [{ ticker, name, primary? }] }
+// — the most affected company first, then the secondarily affected ones.
+// `finding` ('searching' | 'failed'): the AI match for this news isn't ready.
+export default function CompanyFundamentals({ affected = null, finding = null, initialTicker = null }) {
+  const { activeTicker, aiCompanies, addAiCompany } = useActiveTicker()
+  const [ticker, setTicker] = useState(initialTicker || activeTicker || 'TCS')
   const [following, setFollowing] = useState(false)
+  const [loadState, setLoadState] = useState({}) // ticker -> 'loading' | 'unavailable'
 
   // Follow whatever company the current page is about; a manual dropdown pick
   // sticks until the page context changes to a different one.
@@ -65,28 +91,90 @@ export default function CompanyFundamentals() {
     if (activeTicker) setTicker(activeTicker)
   }, [activeTicker])
 
-  const data = FUNDAMENTALS[ticker]
+  if (finding) {
+    return (
+      <section className="w-full max-w-3xl mx-auto mt-xl pt-lg border-t border-outline-variant flex flex-col gap-md">
+        <h2 className="text-headline-md text-on-surface">Company Fundamentals</h2>
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-lg p-lg text-body-md text-on-surface-variant">
+          {finding === 'failed' ? (
+            "Couldn't find a related company for this story right now."
+          ) : (
+            <span className="flex items-center gap-xs animate-pulse">
+              <span className="material-symbols-outlined text-[18px] text-primary">auto_awesome</span>
+              Finding the most related company…
+            </span>
+          )}
+        </div>
+      </section>
+    )
+  }
+
+  // AI-matched companies carry real Finnhub numbers, so they win over demo data.
+  const companies = { ...FUNDAMENTALS, ...aiCompanies }
+  const data = companies[ticker]
+
+  const options = affected
+    ? affected.companies.map((c) => ({
+        value: c.ticker,
+        label: `${c.ticker} · ${c.name}${c.primary ? ' (most affected)' : ''}`,
+      }))
+    : [...new Set([...TICKERS, ticker])].map((t) => ({ value: t, label: t }))
+
+  // Secondary companies' data is fetched only when someone picks one.
+  function selectTicker(next) {
+    setTicker(next)
+    const isSecondary = affected?.companies.some((c) => c.ticker === next && !c.primary)
+    if (!isSecondary || companies[next] || loadState[next] === 'loading') return
+    setLoadState((s) => ({ ...s, [next]: 'loading' }))
+    api
+      .get(`/news/live/${affected.articleId}/company/${encodeURIComponent(next)}`)
+      .then((r) => {
+        if (r.data) addAiCompany(next, { ...r.data, aiReason: r.reason })
+        setLoadState((s) => ({ ...s, [next]: r.data ? undefined : 'unavailable' }))
+      })
+      .catch(() => setLoadState((s) => ({ ...s, [next]: 'unavailable' })))
+  }
+
+  const header = (
+    <div className="flex items-center justify-between gap-md flex-wrap">
+      <div>
+        <h2 className="text-headline-md text-on-surface">Company Fundamentals</h2>
+        {activeTicker === ticker && !data?.aiReason && <p className="text-body-sm text-on-surface-variant">Matched from this page</p>}
+      </div>
+      <TickerSelect value={ticker} options={options} onChange={selectTicker} />
+    </div>
+  )
+
+  // No data yet (loading), or the ticker couldn't be verified — say so rather
+  // than leave the previous company's numbers on screen.
+  if (!data) {
+    const name = affected?.companies.find((c) => c.ticker === ticker)?.name || ticker
+    return (
+      <section className="w-full max-w-3xl mx-auto mt-xl pt-lg border-t border-outline-variant flex flex-col gap-md">
+        {header}
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-lg p-lg text-body-md text-on-surface-variant">
+          {loadState[ticker] === 'loading' ? (
+            <span className="flex items-center gap-xs">
+              <span className="material-symbols-outlined text-[18px] text-primary animate-pulse">sync</span>
+              Loading market data for {name}…
+            </span>
+          ) : (
+            <>
+              No verified market data for <span className="text-data-mono text-on-surface">{ticker}</span> ({name}) — its
+              ticker couldn&rsquo;t be confirmed on Finnhub, so no figures are shown.
+            </>
+          )}
+        </div>
+      </section>
+    )
+  }
+
   const positive = data.changePercent >= 0
+  const isLive = Boolean(data.aiReason)
 
   return (
     <section className="w-full max-w-3xl mx-auto mt-xl pt-lg border-t border-outline-variant flex flex-col gap-md">
-      <div className="flex items-center justify-between gap-md flex-wrap">
-        <div>
-          <h2 className="text-headline-md text-on-surface">Company Fundamentals</h2>
-          {activeTicker === ticker && <p className="text-body-sm text-on-surface-variant">Matched from this page</p>}
-        </div>
-        <select
-          value={ticker}
-          onChange={(e) => setTicker(e.target.value)}
-          className="h-8 px-sm border border-outline-variant rounded bg-surface-container-lowest text-data-mono text-on-surface focus:border-primary outline-none"
-        >
-          {TICKERS.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-      </div>
+      {header}
 
       <div className="bg-surface-container-lowest border border-outline-variant rounded-lg p-lg flex flex-col gap-md">
         <div className="flex items-start justify-between gap-md flex-wrap">
@@ -122,7 +210,7 @@ export default function CompanyFundamentals() {
               </button>
             </div>
             <div className="flex items-center gap-sm text-body-sm text-on-surface-variant">
-              <span>{data.website}</span>
+              {data.website !== '—' && <span>{data.website}</span>}
               {data.bse !== '—' && <span>BSE: {data.bse}</span>}
               {data.nse !== '—' && <span>NSE: {data.nse}</span>}
             </div>
@@ -140,15 +228,18 @@ export default function CompanyFundamentals() {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-md border-t border-outline-variant pt-md">
-          <Metric label="Market Cap" value={`${data.currency} ${data.metrics.marketCap}`} />
-          <Metric label="Current Price" value={`${data.currency} ${data.metrics.currentPrice}`} />
-          <Metric label="High / Low" value={`${data.currency} ${data.metrics.high} / ${data.metrics.low}`} />
-          <Metric label="Stock P/E" value={data.metrics.stockPE} />
-          <Metric label="Book Value" value={`${data.currency} ${data.metrics.bookValue}`} />
-          <Metric label="Dividend Yield" value={`${data.metrics.dividendYield} %`} />
-          <Metric label="ROCE" value={`${data.metrics.roce}${data.metrics.roce === '—' ? '' : ' %'}`} />
-          <Metric label="ROE" value={`${data.metrics.roe} %`} />
-          <Metric label="Face Value" value={`${data.currency} ${data.metrics.faceValue}`} />
+          <Metric label="Market Cap" value={fmt(data.metrics.marketCap, `${data.currency} `)} />
+          <Metric label="Current Price" value={fmt(data.metrics.currentPrice, `${data.currency} `)} />
+          <Metric
+            label={isLive ? '52W High / Low' : 'High / Low'}
+            value={data.metrics.high == null ? '—' : `${data.currency} ${data.metrics.high} / ${data.metrics.low}`}
+          />
+          <Metric label="Stock P/E" value={fmt(data.metrics.stockPE)} />
+          <Metric label="Book Value" value={fmt(data.metrics.bookValue, `${data.currency} `)} />
+          <Metric label="Dividend Yield" value={fmt(data.metrics.dividendYield, '', ' %')} />
+          <Metric label="ROCE" value={fmt(data.metrics.roce, '', ' %')} />
+          <Metric label="ROE" value={fmt(data.metrics.roe, '', ' %')} />
+          <Metric label="Face Value" value={fmt(data.metrics.faceValue, `${data.currency} `)} />
         </div>
 
         <div className="flex flex-wrap gap-md border-t border-outline-variant pt-md">
@@ -158,7 +249,11 @@ export default function CompanyFundamentals() {
           <GrowthTable title="Return on Equity" rows={data.growth.roe} />
         </div>
 
-        <p className="text-body-sm text-outline">Demo data for illustration — not a live market feed.</p>
+        <p className="text-body-sm text-outline">
+          {isLive
+            ? 'Live market data from Finnhub. Company matched to the news by AI — not investment advice.'
+            : 'Demo data for illustration — not a live market feed.'}
+        </p>
       </div>
     </section>
   )

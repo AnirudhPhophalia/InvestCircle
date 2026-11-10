@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { profileLink } from '../../shared/lib/voiceReactions.js'
 
 // Deterministic small base count from an id string, so demo reactions look
 // populated but stay stable across re-renders instead of jumping around.
@@ -97,7 +99,9 @@ export default function VoiceStoryViewer({ reactions, startIndex, onClose }) {
           <div className="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center text-[11px] font-bold">
             {current.initials}
           </div>
-          <div className="text-on-surface text-body-sm font-medium">{current.initials === 'YOU' ? 'You' : current.initials}</div>
+          <Link to={profileLink(current)} onClick={onClose} className="text-on-surface text-body-sm font-medium hover:text-primary hover:underline">
+            {current.initials === 'YOU' ? 'You' : current.name || current.initials}
+          </Link>
           <button onClick={onClose} className="ml-auto text-on-surface-variant hover:text-on-surface">
             <span className="material-symbols-outlined">close</span>
           </button>

@@ -7,10 +7,19 @@ import { createNotification } from './notifications.js'
 
 const router = Router()
 
+// Profile photos are stored inline as small data URLs (the browser crops and
+// resizes them to 256px first) and get rendered for every viewer, so only
+// accept genuine, small PNG/JPEG/WebP images.
+const AVATAR_PATTERN = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+=*$/
+const MAX_AVATAR_LENGTH = 95_000 // stays under express.json()'s default 100 KB body limit
+
 router.patch('/me', requireAuth, async (req, res) => {
   const { rows } = await db.query('SELECT * FROM users WHERE id = $1', [req.userId])
   const user = rows[0]
   const { displayName, bio, avatar } = req.body
+  if (avatar != null && (typeof avatar !== 'string' || avatar.length > MAX_AVATAR_LENGTH || !AVATAR_PATTERN.test(avatar))) {
+    return res.status(400).json({ error: 'Photo must be a small PNG, JPEG or WebP image' })
+  }
   await db.query('UPDATE users SET display_name = $1, bio = $2, avatar = $3 WHERE id = $4', [
     displayName ?? user.display_name,
     bio ?? user.bio,
@@ -21,11 +30,13 @@ router.patch('/me', requireAuth, async (req, res) => {
   res.json(toPublicUser(updated[0]))
 })
 
-router.get('/:id', async (req, res) => {
-  const { rows } = await db.query('SELECT * FROM users WHERE id = $1', [req.params.id])
+router.get('/:id', optionalAuth, async (req, res) => {
+  // Accepts a numeric id or a handle (voice reactions link by handle).
+  const column = /^\d+$/.test(req.params.id) ? 'id' : 'handle'
+  const { rows } = await db.query(`SELECT * FROM users WHERE ${column} = $1`, [req.params.id])
   const user = rows[0]
   if (!user) return res.status(404).json({ error: 'User not found' })
-  const { rows: countRows } = await db.query('SELECT COUNT(*) AS n FROM posts WHERE user_id = $1', [req.params.id])
+  const { rows: countRows } = await db.query('SELECT COUNT(*) AS n FROM posts WHERE user_id = $1', [user.id])
   
   let accuracyDetails = null
   if (user.accuracy_details) {
@@ -36,8 +47,11 @@ router.get('/:id', async (req, res) => {
     }
   }
 
+  // Profiles are public, but an email address is only shown to its owner.
+  const { email, ...publicUser } = toPublicUser(user)
   res.json({
-    ...toPublicUser(user),
+    ...publicUser,
+    ...(req.userId === user.id ? { email } : {}),
     stats: {
       posts: Number(countRows[0].n),
       followers: user.follower_count,

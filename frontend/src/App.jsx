@@ -30,6 +30,7 @@ export default function App() {
                 <Route path="news" element={<NewsReel />} />
                 <Route path="news/:id" element={<NewsDetail />} />
                 <Route path="profile" element={<Profile />} />
+                <Route path="users/:id" element={<Profile />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/discussions" replace />} />

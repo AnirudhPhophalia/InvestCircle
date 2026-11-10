@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { api } from '../../shared/lib/api.js'
 import { timeAgo } from '../../shared/lib/time.js'
 import { findKnownTicker } from '../../shared/lib/fundamentals.js'
@@ -105,7 +105,9 @@ export default function PostDetail() {
         <VoteButtons post={post} onChange={(r) => setPost((p) => ({ ...p, score: r.score, my_vote: r.my_vote }))} />
         <div className="p-lg flex-1 flex flex-col gap-sm">
           <div className="flex items-center gap-xs text-body-sm text-outline flex-wrap">
-            <span className="font-bold text-on-surface">u/{post.handle}</span>
+            <Link to={`/users/${post.user_id}`} className="font-bold text-on-surface hover:text-primary hover:underline">
+              u/{post.handle}
+            </Link>
             {post.badge && (
               <span className="px-xs py-[2px] bg-secondary/10 text-secondary border border-secondary/20 rounded text-[10px] uppercase tracking-wider">
                 {post.badge}
@@ -176,7 +178,9 @@ export default function PostDetail() {
               <Avatar user={c} className="w-8 h-8" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-xs flex-wrap">
-                  <span className="font-bold text-on-surface text-body-sm">{c.display_name}</span>
+                  <Link to={`/users/${c.user_id}`} className="font-bold text-on-surface text-body-sm hover:text-primary hover:underline">
+                    {c.display_name}
+                  </Link>
                   {c.user_id === post.user_id && (
                     <span className="text-[9.5px] font-bold px-sm py-[1px] bg-primary/10 text-primary rounded uppercase tracking-wide">OP</span>
                   )}
@@ -244,7 +248,9 @@ export default function PostDetail() {
                         <Avatar user={r} className="w-6 h-6" />
                         <div>
                           <div className="flex items-center gap-xs">
-                            <span className="font-bold text-on-surface text-body-sm">{r.display_name}</span>
+                            <Link to={`/users/${r.user_id}`} className="font-bold text-on-surface text-body-sm hover:text-primary hover:underline">
+                              {r.display_name}
+                            </Link>
                             <span className="text-body-sm text-outline">{timeAgo(r.created_at)}</span>
                           </div>
                           <p className="text-body-sm text-on-surface mt-[2px]">{r.body}</p>

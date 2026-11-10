@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import db from '../db.js'
 import { optionalAuth } from '../auth.js'
+import { fetchSecondaryCompany, isCompanyMatchConfigured, matchCompany } from '../companyMatch.js'
 
 const router = Router()
 
@@ -8,6 +9,10 @@ const router = Router()
 // limit every time someone loads the tab — one shared fetch per 5 minutes.
 let liveNewsCache = { at: 0, items: [] }
 const LIVE_NEWS_TTL_MS = 5 * 60 * 1000
+// Every live article we've served, so a card can still be matched after it
+// rotates out of the latest batch. Only these ids reach the LLM — clients
+// can't submit their own text and spend the OpenRouter budget.
+const liveArticlesById = new Map()
 
 router.get('/live', async (req, res) => {
   if (!process.env.FINNHUB_API_KEY) return res.json([])
@@ -36,10 +41,37 @@ router.get('/live', async (req, res) => {
       }))
 
     liveNewsCache = { at: Date.now(), items }
+    items.forEach((item) => liveArticlesById.set(String(item.id), item))
     res.json(items)
   } catch (err) {
     console.error('Finnhub fetch failed:', err.message)
     res.json(liveNewsCache.items) // serve stale cache (possibly empty) rather than fail the page
+  }
+})
+
+router.get('/live/:id/company', async (req, res) => {
+  if (!isCompanyMatchConfigured()) return res.status(503).json({ error: 'Company matching is not configured' })
+  const article = liveArticlesById.get(req.params.id)
+  if (!article) return res.status(404).json({ error: 'Unknown live article' })
+  try {
+    res.json(await matchCompany(article))
+  } catch (err) {
+    console.error('Company match failed:', err.message)
+    res.status(502).json({ error: 'Could not match a company for this article' })
+  }
+})
+
+router.get('/live/:id/company/:ticker', async (req, res) => {
+  if (!isCompanyMatchConfigured()) return res.status(503).json({ error: 'Company matching is not configured' })
+  const article = liveArticlesById.get(req.params.id)
+  if (!article) return res.status(404).json({ error: 'Unknown live article' })
+  try {
+    const company = await fetchSecondaryCompany(article, req.params.ticker.toUpperCase())
+    if (!company) return res.status(404).json({ error: 'That company is not listed as affected by this article' })
+    res.json(company)
+  } catch (err) {
+    console.error('Secondary company lookup failed:', err.message)
+    res.status(502).json({ error: 'Could not load that company' })
   }
 })
 

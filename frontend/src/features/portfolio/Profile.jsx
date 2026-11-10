@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../../shared/context/AuthContext.jsx'
 import { api } from '../../shared/lib/api.js'
 import { timeAgo } from '../../shared/lib/time.js'
 import { FUNDAMENTALS, TICKERS, numericPrice } from '../../shared/lib/fundamentals.js'
+import ProfilePhoto from './ProfilePhoto.jsx'
 import Avatar from '../../shared/components/Avatar.jsx'
 import PostCard from '../discussions/PostCard.jsx'
 
@@ -129,8 +130,22 @@ function PortfolioSummary({ currency, invested, currentValue, pl, plPercent, one
   )
 }
 
+// /profile is your own page; /users/:id is anyone's public page (no portfolio,
+// no editing). Keyed by id so moving between people starts fresh.
 export default function Profile() {
-  const { user, updateUser } = useAuth()
+  const { id } = useParams()
+  return <ProfileView key={id ?? 'me'} id={id} />
+}
+
+function ProfileView({ id }) {
+  const { user: me, updateUser } = useAuth()
+  const [person, setPerson] = useState(null)
+  const [notFound, setNotFound] = useState(false)
+  // `id` may be a numeric id or a handle; it resolves to a person first.
+  const isMe = !id || (person != null && person.id === me?.id)
+  const user = isMe ? me : person
+  const profileId = isMe ? me?.id : person?.id
+  const tabs = isMe ? TABS : TABS.filter((t) => t !== 'Portfolio')
   const [stats, setStats] = useState(null)
   const [tab, setTab] = useState('Posts')
   const [posts, setPosts] = useState(null)
@@ -151,15 +166,22 @@ export default function Profile() {
   const [saveKeyLocally, setSaveKeyLocally] = useState(true)
 
   useEffect(() => {
-    if (user) api.get(`/users/${user.id}`).then((u) => setStats(u.stats))
-  }, [user])
+    if (!me) return
+    api
+      .get(`/users/${id ?? me.id}`)
+      .then((u) => {
+        setStats(u.stats)
+        setPerson(u)
+      })
+      .catch(() => setNotFound(true))
+  }, [id, me])
 
   useEffect(() => {
-    if (!user) return
-    if (tab === 'Posts' && posts === null) api.get(`/users/${user.id}/posts`).then(setPosts)
-    if (tab === 'Participation' && comments === null) api.get(`/users/${user.id}/comments`).then(setComments)
-    if (tab === 'Portfolio' && watchlist === null) api.get('/watchlist').then(setWatchlist)
-  }, [tab, user, posts, comments, watchlist])
+    if (!profileId) return
+    if (tab === 'Posts' && posts === null) api.get(`/users/${profileId}/posts`).then(setPosts)
+    if (tab === 'Participation' && comments === null) api.get(`/users/${profileId}/comments`).then(setComments)
+    if (tab === 'Portfolio' && isMe && watchlist === null) api.get('/watchlist').then(setWatchlist)
+  }, [tab, profileId, isMe, posts, comments, watchlist])
 
   const holdings = useMemo(() => (watchlist || []).map(enrichHolding), [watchlist])
   const summaries = useMemo(() => summarizeByCurrency(holdings), [holdings])
@@ -206,7 +228,7 @@ export default function Profile() {
     setAccuracyError('')
 
     try {
-      const res = await api.post(`/users/${user.id}/accuracy`, keyToUse ? { apiKey: keyToUse } : {})
+      const res = await api.post(`/users/${profileId}/accuracy`, keyToUse ? { apiKey: keyToUse } : {})
       if (res?.stats) {
         setStats(res.stats)
       }
@@ -233,12 +255,13 @@ export default function Profile() {
     handleGetAccuracy(apiKeyInput.trim())
   }
 
-  if (!user) return null
+  if (notFound) return <p className="text-body-md text-on-surface-variant pt-lg">This user doesn&rsquo;t exist.</p>
+  if (!user) return <p className="text-body-md text-on-surface-variant pt-lg">Loading profile…</p>
 
   return (
     <div className="w-full max-w-[800px] mx-auto flex flex-col gap-xl">
       <section className="flex flex-col md:flex-row items-start gap-lg pt-lg">
-        <Avatar user={user} className="w-24 h-24 text-display" />
+        {isMe ? <ProfilePhoto /> : <Avatar user={user} className="w-24 h-24 text-display shrink-0" />}
         <div className="flex-1 w-full flex flex-col gap-md">
           <div className="flex justify-between items-start w-full gap-md">
             <div>
@@ -248,7 +271,7 @@ export default function Profile() {
                 {user.badge ? ` · ${user.badge}` : ''}
               </p>
             </div>
-            {!editing && (
+            {isMe && !editing && (
               <button
                 onClick={() => {
                   setBioDraft(user.bio)
@@ -358,7 +381,7 @@ export default function Profile() {
       </section>
 
       <div className="border-b border-surface-variant flex gap-lg">
-        {TABS.map((t) => (
+        {tabs.map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
