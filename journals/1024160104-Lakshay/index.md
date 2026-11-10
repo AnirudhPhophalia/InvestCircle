@@ -6,3 +6,4 @@ Name: lakshay Sachdeva
 +  [W1 : InvestCircle Project Setup (Phase 0)](./w1-project-setup.md)
 +  [W2 : InvestCircle Phases 1-4](./w2-phases-1-4.md)
 +  [W3 : Frontend, Routing & Feature Ideation](./w3-frontend-routes-ideation.md)
++  [W4 : News–Company Mapping, News Reel UI & Profiles](./w4-news-mapping-reel-ui-profiles.md)
