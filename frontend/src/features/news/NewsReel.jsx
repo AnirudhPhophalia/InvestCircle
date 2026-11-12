@@ -16,10 +16,8 @@ export default function NewsReel() {
   const { byNewsId: reactions, seedIfNeeded, addReaction } = useVoiceReactions()
   const [params] = useSearchParams()
   const q = params.get('q') || ''
-  const [news, setNews] = useState(null)
   const [liveItems, setLiveItems] = useState([])
   const [liveLoaded, setLiveLoaded] = useState(false)
-  const [error, setError] = useState('')
   const [index, setIndex] = useState(0)
   const [dragX, setDragX] = useState(0)
   const [dragging, setDragging] = useState(false)
@@ -47,6 +45,7 @@ export default function NewsReel() {
               name: r.name,
               reason: r.reason,
               hasData: Boolean(r.data),
+              byAi: Boolean(r.model),
               secondary: r.secondary || [],
             },
           }))
@@ -59,22 +58,10 @@ export default function NewsReel() {
     [addAiCompany]
   )
 
-  useEffect(() => {
-    setNews(null)
-    setError('')
-    setIndex(0)
-    const query = q ? `?q=${encodeURIComponent(q)}` : ''
-    api
-      .get(`/news${query}`)
-      .then((items) => {
-        setNews(items)
-        items.forEach((item, i) => seedIfNeeded(item.id, i))
-      })
-      .catch((e) => setError(e.message))
-  }, [q, seedIfNeeded])
+  useEffect(() => setIndex(0), [q])
 
-  // Pull real-time headlines from Finnhub (via our backend) and merge them in
-  // ahead of the seeded cards. Refetches every 60s so the reel stays current.
+  // The reel is live news only: company-specific stories from Finnhub (via our
+  // backend), each tagged with its company. Refetches every 60s.
   useEffect(() => {
     let cancelled = false
     function fetchLive() {
@@ -88,15 +75,13 @@ export default function NewsReel() {
             headline: a.headline,
             body: a.summary,
             source: a.source,
-            tags: '',
+            tags: a.ticker || '',
             published_at: a.publishedAt,
             live: true,
             externalUrl: a.url,
           }))
           mapped.forEach((item, i) => seedIfNeeded(item.id, i))
           setLiveItems(mapped)
-          // Match every live card up front so swiping to one is instant.
-          mapped.forEach(requestMatch)
         })
         .catch(() => {}) // live news is a bonus, not critical — fail silently
         .finally(() => !cancelled && setLiveLoaded(true))
@@ -107,13 +92,22 @@ export default function NewsReel() {
       cancelled = true
       clearInterval(interval)
     }
-  }, [seedIfNeeded, requestMatch])
+  }, [seedIfNeeded])
 
-  // Wait for the live batch too, so the reel doesn't open on a demo card and
-  // then jump when live cards land in front of it.
-  const combinedNews = news && liveLoaded ? [...liveItems, ...news] : null
+  const needle = q.toLowerCase()
+  const combinedNews = !liveLoaded
+    ? null
+    : liveItems.filter((n) => !needle || `${n.headline} ${n.body} ${n.tags}`.toLowerCase().includes(needle))
   const currentItem = combinedNews?.[Math.min(index, combinedNews.length - 1)]
   const currentMatch = currentItem?.live ? matches[currentItem.id] : null
+
+  // Match the card on screen and pre-match the next one, so swiping stays
+  // instant without spending an LLM call on every story in the feed.
+  useEffect(() => {
+    if (!combinedNews?.length) return
+    const at = Math.min(index, combinedNews.length - 1)
+    combinedNews.slice(at, at + 2).forEach(requestMatch)
+  }, [combinedNews, index, requestMatch])
 
   // Keep the fundamentals panel following whichever card is currently showing:
   // seeded cards by their tags, live cards by their AI-matched company.
@@ -123,7 +117,6 @@ export default function NewsReel() {
     else setActiveTicker(currentMatch?.status === 'done' ? currentMatch.ticker : null)
   }, [currentItem, currentMatch, setActiveTicker])
 
-  if (error) return <p className="text-body-md text-error">{error}</p>
   if (combinedNews === null) {
     return (
       <p className="w-full max-w-md mx-auto pt-xl text-body-md text-on-surface-variant flex items-center justify-center gap-xs animate-pulse">
@@ -288,7 +281,7 @@ export default function NewsReel() {
             <div className="bg-surface-container-low border border-outline-variant rounded p-sm flex flex-col gap-[2px]">
               <span className="text-label-caps text-on-surface-variant uppercase tracking-wider flex items-center gap-xs">
                 <span className="material-symbols-outlined text-[14px] text-primary">auto_awesome</span>
-                Most affected (AI)
+                {currentMatch.byAi ? "Most affected (AI)" : "Company in this story"}
               </span>
               <span className="text-body-md text-on-surface">
                 {currentMatch.name} <span className="text-data-mono text-primary">{currentMatch.ticker}</span>

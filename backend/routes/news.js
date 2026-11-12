@@ -14,6 +14,43 @@ const LIVE_NEWS_TTL_MS = 5 * 60 * 1000
 // can't submit their own text and spend the OpenRouter budget.
 const liveArticlesById = new Map()
 
+// Large US listings Finnhub's free tier covers fully (quote, profile, metrics),
+// so every story's company always has fundamentals to show.
+// Each maps to the words a headline must contain to count as that company's
+// story — Finnhub tags loosely ("Plug Power downgrade" arrives as WMT news).
+const NEWS_TICKERS = {
+  AAPL: ['apple', 'iphone'],
+  MSFT: ['microsoft', 'azure'],
+  NVDA: ['nvidia'],
+  AMZN: ['amazon', 'aws'],
+  GOOGL: ['alphabet', 'google', 'youtube'],
+  META: ['meta', 'facebook', 'instagram', 'whatsapp'],
+  TSLA: ['tesla', 'cybertruck'],
+  JPM: ['jpmorgan', 'jp morgan'],
+  XOM: ['exxon'],
+  NFLX: ['netflix'],
+  AMD: ['amd', 'advanced micro devices'],
+  WMT: ['walmart'],
+}
+const ARTICLES_PER_TICKER = 2
+
+const isoDay = (msAgo) => new Date(Date.now() - msAgo).toISOString().slice(0, 10)
+
+const namesCompany = (headline = '', ticker) =>
+  [ticker.toLowerCase(), ...NEWS_TICKERS[ticker]].some((w) => new RegExp(`\\b${w}\\b`, 'i').test(headline))
+
+// Latest company-specific stories for one ticker (Finnhub /company-news).
+async function companyNews(ticker) {
+  const url = `https://finnhub.io/api/v1/company-news?symbol=${ticker}&from=${isoDay(7 * 864e5)}&to=${isoDay(0)}&token=${process.env.FINNHUB_API_KEY}`
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`Finnhub company-news ${ticker}: ${res.status}`)
+  const articles = await res.json()
+  return articles
+    .filter((a) => a.summary && namesCompany(a.headline, ticker))
+    .slice(0, ARTICLES_PER_TICKER)
+    .map((a) => ({ ...a, ticker }))
+}
+
 router.get('/live', async (req, res) => {
   if (!process.env.FINNHUB_API_KEY) return res.json([])
 
@@ -22,23 +59,23 @@ router.get('/live', async (req, res) => {
   }
 
   try {
-    const finnhubRes = await fetch(
-      `https://finnhub.io/api/v1/news?category=general&token=${process.env.FINNHUB_API_KEY}`
-    )
-    if (!finnhubRes.ok) throw new Error(`Finnhub responded ${finnhubRes.status}`)
-    const articles = await finnhubRes.json()
-
-    const items = articles
-      .filter((a) => a.headline && a.summary)
-      .slice(0, 8)
+    // One failing ticker shouldn't empty the feed.
+    const results = await Promise.allSettled(Object.keys(NEWS_TICKERS).map(companyNews))
+    const seenHeadlines = new Set()
+    const items = results
+      .flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
+      .filter((a) => !seenHeadlines.has(a.headline) && seenHeadlines.add(a.headline))
+      .sort((a, b) => b.datetime - a.datetime)
       .map((a) => ({
         id: a.id,
+        ticker: a.ticker,
         headline: a.headline,
         summary: a.summary,
         source: a.source,
         url: a.url,
         publishedAt: new Date(a.datetime * 1000).toISOString(),
       }))
+    if (items.length === 0) throw new Error('No company news returned')
 
     liveNewsCache = { at: Date.now(), items }
     items.forEach((item) => liveArticlesById.set(String(item.id), item))
@@ -50,7 +87,7 @@ router.get('/live', async (req, res) => {
 })
 
 router.get('/live/:id/company', async (req, res) => {
-  if (!isCompanyMatchConfigured()) return res.status(503).json({ error: 'Company matching is not configured' })
+  if (!process.env.FINNHUB_API_KEY) return res.status(503).json({ error: 'Live market data is not configured' })
   const article = liveArticlesById.get(req.params.id)
   if (!article) return res.status(404).json({ error: 'Unknown live article' })
   try {

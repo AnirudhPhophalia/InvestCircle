@@ -36,10 +36,10 @@ const MATCH_SCHEMA = {
   additionalProperties: false,
 }
 
-function buildPrompt({ headline, summary }, correction) {
+function buildPrompt({ headline, summary, ticker }, correction) {
   return `${correction ? `${correction}\n\n` : ''}You are an equity analyst. Identify the ONE publicly traded company whose stock is most directly and materially affected by this news.
 
-Rules:
+Rules:${ticker ? `\n- This story comes from ${ticker}'s company news feed: the most affected company is ${ticker}. Use exactly that ticker.` : ''}
 - If the news names a specific company, pick that company.
 - If it is sector or macro news, pick the largest, most directly exposed company for that driver. Examples: oil prices → ExxonMobil (XOM); interest-rate decisions → JPMorgan Chase (JPM); chip export rules → NVIDIA (NVDA); airline demand → Delta (DAL).
 - The ticker MUST trade on NYSE or NASDAQ. For non-US companies use their US-listed ADR (Infosys → INFY, HDFC Bank → HDB, ICICI Bank → IBN, Wipro → WIT, Toyota → TM, TSMC → TSM). If the most affected company has no US listing, pick the most affected US-listed company instead.
@@ -52,7 +52,16 @@ Headline: ${headline}
 Summary: ${summary}`
 }
 
-async function askLlm(article, correction) {
+// One OpenRouter call at a time: a low-credit key rejects concurrent requests
+// ("would exceed your available credits given your current in-flight requests").
+let llmQueue = Promise.resolve()
+function askLlm(article, correction) {
+  const call = llmQueue.then(() => callLlm(article, correction))
+  llmQueue = call.catch(() => {})
+  return call
+}
+
+async function callLlm(article, correction) {
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -63,7 +72,7 @@ async function askLlm(article, correction) {
       model: MODEL,
       // Low-credit keys reject requests that don't cap output: OpenRouter
       // otherwise reserves the model's full output budget up front.
-      max_tokens: 1200,
+      max_tokens: 900, // a full answer is ~500 tokens
       messages: [{ role: 'user', content: buildPrompt(article, correction) }],
       response_format: { type: 'json_schema', json_schema: { name: 'company_match', strict: true, schema: MATCH_SCHEMA } },
     }),
@@ -164,6 +173,12 @@ export function isCompanyMatchConfigured() {
 // Ask the LLM, check its ticker against Finnhub, and give it one corrected
 // retry if the ticker is unknown or belongs to a different company.
 async function resolveMatch(article) {
+  // Company-feed stories already know their company — only the text and the
+  // secondary companies come from the LLM.
+  if (article.ticker) {
+    const match = await askLlm(article)
+    return { ...match, ticker: article.ticker, secondary: match.secondary.filter((s) => s.ticker !== article.ticker), verified: true }
+  }
   const first = await askLlm(article)
   const firstData = await fetchFundamentals(first.ticker)
   if (sameCompany(first.name, firstData?.name)) return { ...first, verified: true }
@@ -189,7 +204,16 @@ function getMatch(article) {
 // The most affected company, with its fundamentals, plus the secondarily
 // affected ones (names only — their data is fetched when someone picks one).
 export async function matchCompany(article) {
-  const match = await getMatch(article)
+  let match
+  try {
+    if (!process.env.OPENROUTER_API_KEY) throw new Error('OPENROUTER_API_KEY not set')
+    match = await getMatch(article)
+  } catch (err) {
+    if (!article.ticker) throw err
+    // The LLM is down or out of credit: still show the story's own company.
+    console.error('Company match LLM failed, using the feed ticker:', err.message)
+    return feedOnlyMatch(article)
+  }
   // Never show one company's numbers under another company's name.
   const fundamentals = match.verified ? await fetchFundamentals(match.ticker) : null
   return {
@@ -199,6 +223,19 @@ export async function matchCompany(article) {
     model: MODEL,
     data: fundamentals && { ...fundamentals, about: match.about, keyPoints: match.keyPoints },
     secondary: match.secondary.map(({ ticker, name, reason }) => ({ ticker, name, reason })),
+  }
+}
+
+async function feedOnlyMatch(article) {
+  const fundamentals = await fetchFundamentals(article.ticker)
+  const name = fundamentals?.name || article.ticker
+  return {
+    ticker: article.ticker,
+    name,
+    reason: `This story is from ${name}'s own company news feed.`,
+    model: null,
+    data: fundamentals && { ...fundamentals, about: article.summary, keyPoints: `In the news: ${article.headline}` },
+    secondary: [],
   }
 }
 
