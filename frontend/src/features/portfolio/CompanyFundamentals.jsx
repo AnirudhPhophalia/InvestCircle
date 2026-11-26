@@ -202,7 +202,7 @@ export default function CompanyFundamentals({ affected = null, finding = null, i
               </button>
               <button
                 onClick={() => setFollowing((f) => !f)}
-                className={`text-label-caps px-sm py-xs rounded transition-colors ${
+                className={`hidden text-label-caps px-sm py-xs rounded transition-colors ${
                   following ? 'bg-primary/10 text-primary' : 'border border-outline-variant text-on-surface-variant hover:bg-surface-container'
                 }`}
               >
