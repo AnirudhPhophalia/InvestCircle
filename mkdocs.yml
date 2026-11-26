@@ -1,0 +1,40 @@
+site_name: InvestCircle
+site_description: A peer-to-peer stock research and community platform
+site_url: https://anirudhphophalia.github.io/InvestCircle/
+repo_url: https://github.com/AnirudhPhophalia/InvestCircle
+repo_name: AnirudhPhophalia/InvestCircle
+docs_dir: docs
+
+# docs/assets is a symlink to ../assets, which does not exist in the repo
+exclude_docs: |
+  /assets
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - content.code.copy
+
+nav:
+  - Home: index.md
+  - Architecture: ARCHITECTURE.md
+  - Build Phases: PHASES.md
+
+markdown_extensions:
+  - tables
+  - admonition
+  - toc:
+      permalink: true
